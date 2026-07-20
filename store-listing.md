@@ -77,12 +77,12 @@ First release. Screenshot Buddy keeps your screenshots folder spotless from the 
 
 ---
 
-## URLs you must provide
-- **Support URL:** required. A simple page with a contact email works (see support-page.md).
-- **Privacy Policy URL:** required even for no-data apps (see privacy-policy.md).
-- **Marketing URL:** optional.
+## URLs to provide (LIVE — hosted on GitHub Pages)
+- **Privacy Policy URL:** https://wr48gh-a11y.github.io/screenshot-buddy/privacy.html
+- **Support URL:** https://wr48gh-a11y.github.io/screenshot-buddy/support.html
+- **Marketing URL (optional):** https://wr48gh-a11y.github.io/screenshot-buddy/
 
-Host both as plain pages (GitHub Pages, a Notion public page, Carrd, or any static host).
+Source lives in `docs/`; edit and push to update. First deploy can take a couple of minutes.
 
 ---
 
