@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Screenshot Buddy</string>
+	<key>CFBundleExecutable</key>
+	<string>ScreenshotBuddy</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.hugh.screenshotbuddy</string>
+	<key>CFBundleName</key>
+	<string>ScreenshotBuddy</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Screenshot Buddy needs access to your screenshots folder to show and manage your screenshots.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Screenshot Buddy needs access to your screenshots folder to show and manage your screenshots.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Screenshot Buddy needs access to your screenshots folder to show and manage your screenshots.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Hugh Southall. All rights reserved.</string>
+</dict>
+</plist>

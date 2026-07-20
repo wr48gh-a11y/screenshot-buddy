@@ -1,0 +1,10 @@
+# Xcode / build artifacts
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+# XcodeGen generates this from project.yml — not source of truth
+ScreenshotBuddy.xcodeproj/
+
+# Business paperwork with personal info — keep out of the repo
+admin/

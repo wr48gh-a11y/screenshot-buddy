@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot Daddy — Design Explorations</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, Arial, sans-serif;
+    background: #101014; color: #eee; padding: 48px 32px 80px;
+  }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #999; margin-bottom: 44px; font-size: 15px; }
+  .row { margin-bottom: 64px; }
+  .row-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .row-head h2 { font-size: 20px; font-weight: 650; }
+  .badge { font-size: 12px; color: #aaa; background: #26262e; border-radius: 20px; padding: 4px 12px; }
+  .pair { display: flex; gap: 24px; flex-wrap: wrap; }
+  .shot { width: 400px; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); flex-shrink: 0; }
+  .cap { font-size: 12px; color: #888; margin-top: 8px; }
+  .col { display: flex; flex-direction: column; }
+
+  /* ---------- shared bits ---------- */
+  .thumb { border-radius: 8px; position: relative; overflow: hidden; }
+  .thumb::after { content: ""; position: absolute; inset: 0; }
+
+  /* =========== 1. CleanMyMac =========== */
+  .cmm { background: linear-gradient(160deg, #1b1035 0%, #241a4d 45%, #101024 100%); padding: 30px 26px; }
+  .cmm-orb {
+    width: 130px; height: 130px; margin: 12px auto 20px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #8f6cff, #5636c9 60%, #2c1b72);
+    box-shadow: 0 0 60px rgba(130,90,255,.55), inset 0 0 30px rgba(255,255,255,.25);
+    display: flex; align-items: center; justify-content: center; font-size: 46px;
+  }
+  .cmm h3 { text-align: center; font-size: 21px; font-weight: 700; color: #fff; }
+  .cmm p { text-align: center; color: #b9aee6; font-size: 13px; margin: 8px 20px 20px; line-height: 1.45; }
+  .cmm-btn {
+    display: block; margin: 0 auto; width: 78%; padding: 13px; text-align: center; border-radius: 30px;
+    background: linear-gradient(90deg, #7b4dff, #b44dff); color: #fff; font-weight: 650; font-size: 15px;
+    box-shadow: 0 6px 24px rgba(150,80,255,.45);
+  }
+  .cmm-meter { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .cmm-ring {
+    width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+    background: conic-gradient(#8f6cff 0 68%, #372a66 68% 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cmm-ring span { width: 46px; height: 46px; border-radius: 50%; background: #1d1440; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #cfc3ff; }
+  .cmm-meter .col b { color: #fff; font-size: 15px; }
+  .cmm-meter .col small { color: #9c8fd4; font-size: 12px; margin-top: 3px; }
+  .cmm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .cmm-grid .thumb { height: 62px; background: linear-gradient(135deg, #3d2f7a, #57419e); }
+  .cmm-grid .thumb::after { background: linear-gradient(180deg, transparent 55%, rgba(10,5,40,.7)); }
+  .cmm-grid .thumb i { position: absolute; bottom: 4px; left: 7px; font-style: normal; font-size: 9px; color: #d8cfff; }
+
+  /* =========== 2. CleanShot X =========== */
+  .csx { background: #f5f6f8; padding: 28px 26px; color: #1b1d22; }
+  .csx-icon { width: 76px; height: 76px; border-radius: 18px; margin: 10px auto 18px;
+    background: linear-gradient(150deg, #4d9fff, #2e6bff); display: flex; align-items: center; justify-content: center; font-size: 36px;
+    box-shadow: 0 8px 20px rgba(46,107,255,.35); }
+  .csx h3 { text-align: center; font-size: 20px; font-weight: 700; }
+  .csx p { text-align: center; color: #6b7280; font-size: 13px; margin: 8px 26px 20px; line-height: 1.5; }
+  .csx-btn { display: block; margin: 0 auto; width: 72%; padding: 11px; text-align: center; border-radius: 9px;
+    background: #2e6bff; color: #fff; font-weight: 600; font-size: 14px; }
+  .csx-drop { border: 1.5px dashed #b9c2d0; border-radius: 12px; margin: 18px 10px 0; padding: 12px; text-align: center; color: #8a93a3; font-size: 12px; background: #fff; }
+  .csx-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .csx-bar b { font-size: 15px; }
+  .csx-bar span { font-size: 12px; color: #6b7280; }
+  .csx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .csx-grid .thumb { height: 84px; background: linear-gradient(135deg, #dfe7f5, #c3d4f2); border: 1px solid #e2e6ee; box-shadow: 0 2px 6px rgba(20,40,90,.08); }
+  .csx-grid .thumb i { position: absolute; top: 6px; right: 6px; font-style: normal; font-size: 10px; background: rgba(255,255,255,.9); border-radius: 5px; padding: 2px 6px; color: #33415c; }
+  .csx-del { margin-top: 16px; display: block; width: 100%; padding: 12px; text-align: center; border-radius: 10px; background: #ff453a; color: #fff; font-weight: 650; font-size: 14px; }
+
+  /* =========== 3. Raycast =========== */
+  .ray { background: #17181c; padding: 24px 22px; border: 1px solid #2a2c33; }
+  .ray-search { background: #202127; border: 1px solid #33353d; border-radius: 10px; padding: 11px 14px; color: #6f7280; font-size: 14px; margin-bottom: 18px; }
+  .ray h3 { font-size: 17px; font-weight: 650; color: #f2f2f4; text-align: center; margin-bottom: 6px; }
+  .ray p { color: #8b8e98; font-size: 12.5px; text-align: center; margin: 0 24px 18px; line-height: 1.5; }
+  .ray-btn { display: block; margin: 0 auto; width: 66%; padding: 10px; text-align: center; border-radius: 8px; background: #ff6363; color: #17181c; font-weight: 700; font-size: 13px; }
+  .ray-kbd { text-align: center; margin-top: 14px; color: #6f7280; font-size: 11px; }
+  .ray-kbd kbd { background: #26272e; border: 1px solid #3a3c45; border-radius: 5px; padding: 2px 6px; font-family: inherit; font-size: 10px; color: #b9bcc6; }
+  .ray-item { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 8px; }
+  .ray-item.sel { background: #26272e; }
+  .ray-item .thumb { width: 44px; height: 30px; flex-shrink: 0; background: linear-gradient(135deg, #3a4a6b, #2c3a55); }
+  .ray-item .col b { font-size: 12.5px; color: #e8e9ee; font-weight: 550; }
+  .ray-item .col small { font-size: 10.5px; color: #7d808b; margin-top: 2px; }
+  .ray-item kbd { margin-left: auto; background: #26272e; border: 1px solid #3a3c45; border-radius: 5px; padding: 2px 6px; font-size: 10px; color: #9a9daa; font-family: inherit; }
+  .ray-footer { display: flex; justify-content: space-between; border-top: 1px solid #2a2c33; margin-top: 12px; padding-top: 12px; font-size: 11px; color: #8b8e98; }
+  .ray-footer b { color: #ff6363; }
+
+  /* =========== 4. Things 3 =========== */
+  .thg { background: #ffffff; padding: 30px 28px; color: #26272b; }
+  .thg-pie { width: 70px; height: 70px; margin: 8px auto 18px; border-radius: 50%;
+    background: conic-gradient(#3478f6 0 25%, #e8eaef 25% 100%); position: relative; }
+  .thg-pie::after { content: ""; position: absolute; inset: 18px; background: #fff; border-radius: 50%; }
+  .thg h3 { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: -.2px; }
+  .thg p { text-align: center; color: #8e9095; font-size: 13px; margin: 8px 30px 22px; line-height: 1.5; }
+  .thg-btn { display: block; margin: 0 auto; width: 70%; padding: 11px; text-align: center; border-radius: 22px; background: #3478f6; color: #fff; font-weight: 600; font-size: 14px; }
+  .thg-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .thg-head .dot { width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #3478f6; }
+  .thg-head b { font-size: 17px; font-weight: 700; }
+  .thg-head span { margin-left: auto; font-size: 12px; color: #8e9095; }
+  .thg-item { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid #f0f1f4; }
+  .thg-item .chk { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #c8cad1; flex-shrink: 0; }
+  .thg-item .thumb { width: 52px; height: 34px; background: linear-gradient(135deg, #dce6f8, #c8d8f4); }
+  .thg-item .col b { font-size: 13px; font-weight: 550; }
+  .thg-item .col small { font-size: 11px; color: #9a9ca3; margin-top: 2px; }
+  .thg-clear { margin-top: 16px; text-align: center; color: #ff3b30; font-weight: 600; font-size: 13.5px; }
+
+  /* =========== 5. Notion =========== */
+  .ntn { background: #ffffff; padding: 30px 30px; color: #37352f; font-family: -apple-system, "Segoe UI", sans-serif; }
+  .ntn-emoji { font-size: 52px; text-align: center; margin: 6px 0 14px; }
+  .ntn h3 { text-align: center; font-size: 22px; font-weight: 700; letter-spacing: -.3px; }
+  .ntn p { text-align: center; color: #9b9a97; font-size: 13px; margin: 8px 28px 20px; line-height: 1.55; }
+  .ntn-btn { display: block; margin: 0 auto; width: 64%; padding: 9px; text-align: center; border-radius: 6px; background: #2f80ed; color: #fff; font-weight: 550; font-size: 13.5px; }
+  .ntn-hint { text-align: center; margin-top: 14px; color: #c0bfbc; font-size: 11.5px; }
+  .ntn-head { font-size: 17px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .ntn-sub { font-size: 12px; color: #9b9a97; margin-bottom: 16px; }
+  .ntn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ntn-card { border: 1px solid #ebeae8; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .ntn-card .thumb { height: 72px; border-radius: 0; background: linear-gradient(135deg, #efe9df, #e3ded3); }
+  .ntn-card .meta { padding: 8px 10px; }
+  .ntn-card .meta b { font-size: 12px; font-weight: 600; display: block; }
+  .ntn-card .meta small { font-size: 10.5px; color: #9b9a97; }
+  .ntn-del { margin-top: 16px; display: block; text-align: center; padding: 9px; border: 1px solid #f1cdca; color: #e03e3e; border-radius: 6px; font-size: 13px; font-weight: 550; background: #fdf5f5; }
+
+  /* =========== 6. Spotify =========== */
+  .spt { background: linear-gradient(180deg, #1e1e1e 0%, #121212 100%); padding: 30px 26px; }
+  .spt-icon { width: 84px; height: 84px; border-radius: 50%; margin: 8px auto 18px; background: #1db954;
+    display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 10px 30px rgba(29,185,84,.35); }
+  .spt h3 { text-align: center; font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
+  .spt p { text-align: center; color: #a7a7a7; font-size: 13px; margin: 8px 26px 22px; line-height: 1.5; }
+  .spt-btn { display: block; margin: 0 auto; width: 70%; padding: 13px; text-align: center; border-radius: 30px; background: #1db954; color: #000; font-weight: 750; font-size: 14px; letter-spacing: .3px; }
+  .spt-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
+  .spt-head b { color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.3px; }
+  .spt-head span { color: #a7a7a7; font-size: 11px; font-weight: 650; letter-spacing: .8px; }
+  .spt-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .spt-cell .thumb { height: 66px; background: linear-gradient(135deg, #2b4a3e, #1c3a4d); box-shadow: 0 4px 14px rgba(0,0,0,.4); }
+  .spt-cell b { display: block; color: #fff; font-size: 11px; font-weight: 650; margin-top: 7px; }
+  .spt-cell small { color: #a7a7a7; font-size: 10px; }
+  .spt-del { margin-top: 20px; display: block; width: 100%; padding: 13px; text-align: center; border-radius: 30px; background: #e91429; color: #fff; font-weight: 750; font-size: 13.5px; }
+</style>
+</head>
+<body>
+  <h1>Screenshot Daddy — Design Explorations</h1>
+  <div class="sub">Six visual directions. Left: welcome screen (before choosing a folder). Right: the screenshot manager view. Static mockups.</div>
+
+  <!-- 1. CleanMyMac -->
+  <div class="row">
+    <div class="row-head"><h2>1 · CleanMyMac</h2><span class="badge">Borrowing: dark cosmic gradients, glowing hero orb, health-ring, pill gradient buttons</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot cmm">
+          <div class="cmm-orb">🧹</div>
+          <h3>Screenshot Daddy</h3>
+          <p>Your screenshots pile up. Daddy keeps the folder spotless.</p>
+          <div class="cmm-btn">Connect Screenshots Folder</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot cmm">
+          <div class="cmm-meter">
+            <div class="cmm-ring"><span>24</span></div>
+            <div class="col"><b>Desktop is getting messy</b><small>24 screenshots · 48 MB reclaimable</small></div>
+          </div>
+          <div class="cmm-grid">
+            <div class="thumb"><i>2m ago</i></div><div class="thumb"><i>1h ago</i></div><div class="thumb"><i>3h ago</i></div>
+            <div class="thumb"><i>1d ago</i></div><div class="thumb"><i>2d ago</i></div><div class="thumb"><i>3d ago</i></div>
+          </div>
+          <div class="cmm-btn">Sweep All · Free 48 MB</div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CleanShot X -->
+  <div class="row">
+    <div class="row-head"><h2>2 · CleanShot X</h2><span class="badge">Borrowing: crisp light UI, blue accent, card shadows, drag-drop affordance</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot csx">
+          <div class="csx-icon">📸</div>
+          <h3>Welcome to Screenshot Daddy</h3>
+          <p>Point me at your screenshots folder and I'll keep it tidy.</p>
+          <div class="csx-btn">Choose Folder…</div>
+          <div class="csx-drop">or drag your screenshots folder here</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot csx">
+          <div class="csx-bar"><b>Desktop</b><span>24 screenshots · 48 MB</span></div>
+          <div class="csx-grid">
+            <div class="thumb"><i>2m</i></div><div class="thumb"><i>1h</i></div>
+            <div class="thumb"><i>3h</i></div><div class="thumb"><i>1d</i></div>
+          </div>
+          <div class="csx-del">Delete All Permanently</div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Raycast -->
+  <div class="row">
+    <div class="row-head"><h2>3 · Raycast</h2><span class="badge">Borrowing: compact dark list, keyboard-first hints, coral accent, command-bar footer</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot ray">
+          <div class="ray-search">Search screenshots…</div>
+          <h3>Screenshot Daddy</h3>
+          <p>Connect a folder to browse, drag, rename and purge your screenshots without leaving the keyboard.</p>
+          <div class="ray-btn">Connect Folder</div>
+          <div class="ray-kbd"><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>5</kbd> to open from anywhere</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot ray">
+          <div class="ray-item sel"><div class="thumb"></div><div class="col"><b>Screenshot 9.41.03 AM</b><small>2 minutes ago · 2.1 MB</small></div><kbd>␣</kbd></div>
+          <div class="ray-item"><div class="thumb"></div><div class="col"><b>Screenshot 9.02.11 AM</b><small>41 minutes ago · 1.4 MB</small></div></div>
+          <div class="ray-item"><div class="thumb"></div><div class="col"><b>Screenshot 8.13.09 AM</b><small>1 hour ago · 3.0 MB</small></div></div>
+          <div class="ray-item"><div class="thumb"></div><div class="col"><b>Screenshot Yesterday</b><small>1 day ago · 900 KB</small></div></div>
+          <div class="ray-footer"><span><b>⌫</b> Delete All (24)</span><span><kbd>↵</kbd> Open · <kbd>␣</kbd> Quick Look</span></div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Things 3 -->
+  <div class="row">
+    <div class="row-head"><h2>4 · Things 3</h2><span class="badge">Borrowing: airy whitespace, progress pie, checklist metaphor, quiet typography</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot thg">
+          <div class="thg-pie"></div>
+          <h3>Screenshot Daddy</h3>
+          <p>Treat screenshots like to-dos: review them, then check them all off at once.</p>
+          <div class="thg-btn">Choose Folder</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot thg">
+          <div class="thg-head"><div class="dot"></div><b>Screenshots</b><span>24 to clear</span></div>
+          <div class="thg-item"><div class="chk"></div><div class="thumb"></div><div class="col"><b>Screenshot 9.41 AM</b><small>2 minutes ago</small></div></div>
+          <div class="thg-item"><div class="chk"></div><div class="thumb"></div><div class="col"><b>Screenshot 9.02 AM</b><small>41 minutes ago</small></div></div>
+          <div class="thg-item"><div class="chk"></div><div class="thumb"></div><div class="col"><b>Screenshot 8.13 AM</b><small>1 hour ago</small></div></div>
+          <div class="thg-clear">Clear All 24…</div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Notion -->
+  <div class="row">
+    <div class="row-head"><h2>5 · Notion</h2><span class="badge">Borrowing: emoji hero, gallery cards, warm neutrals, understated buttons</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot ntn">
+          <div class="ntn-emoji">🗂️</div>
+          <h3>Screenshot Daddy</h3>
+          <p>A tidy little home for your messy screenshots.</p>
+          <div class="ntn-btn">Connect a folder</div>
+          <div class="ntn-hint">You can change this any time in Settings</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot ntn">
+          <div class="ntn-head">🗂️ Screenshots</div>
+          <div class="ntn-sub">Desktop · 24 items · sorted by newest</div>
+          <div class="ntn-grid">
+            <div class="ntn-card"><div class="thumb"></div><div class="meta"><b>Screenshot 9.41 AM</b><small>2 minutes ago</small></div></div>
+            <div class="ntn-card"><div class="thumb"></div><div class="meta"><b>Screenshot 9.02 AM</b><small>41 minutes ago</small></div></div>
+          </div>
+          <div class="ntn-del">Delete all permanently</div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Spotify -->
+  <div class="row">
+    <div class="row-head"><h2>6 · Spotify</h2><span class="badge">Borrowing: near-black canvas, bold type, green accent, album-art grid</span></div>
+    <div class="pair">
+      <div>
+        <div class="shot spt">
+          <div class="spt-icon">🎯</div>
+          <h3>Screenshot Daddy</h3>
+          <p>Millions of pixels. Zero clutter. Connect your folder to start.</p>
+          <div class="spt-btn">CONNECT FOLDER</div>
+        </div>
+        <div class="cap">Welcome</div>
+      </div>
+      <div>
+        <div class="shot spt">
+          <div class="spt-head"><b>Recently captured</b><span>24 SHOTS</span></div>
+          <div class="spt-grid">
+            <div class="spt-cell"><div class="thumb"></div><b>9.41 AM</b><small>2m ago</small></div>
+            <div class="spt-cell"><div class="thumb"></div><b>9.02 AM</b><small>41m ago</small></div>
+            <div class="spt-cell"><div class="thumb"></div><b>8.13 AM</b><small>1h ago</small></div>
+          </div>
+          <div class="spt-del">DELETE ALL</div>
+        </div>
+        <div class="cap">Manager</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

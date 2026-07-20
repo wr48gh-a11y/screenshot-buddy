@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Two-Button Sweep — 7 Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, sans-serif;
+    background: #17121f; color: #eee; padding: 44px 40px 80px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #8b85a5; margin-bottom: 40px; font-size: 14px; }
+  .row { margin-bottom: 34px; max-width: 470px; }
+  .row .desc { font-size: 12.5px; color: #8b85a5; margin-bottom: 10px; }
+  .row .desc b { color: #cfc7e6; font-weight: 650; }
+  .panel { background: linear-gradient(180deg,#241a3d,#1a1330); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,.06); }
+
+  .pill { display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 24px;
+    background: linear-gradient(90deg,#7b4dff,#b44dff); box-shadow: 0 8px 24px rgba(123,77,255,.42); color: #fff; padding: 0 18px; }
+  .pill b { font-size: 15px; font-weight: 650; }
+  .chip { font-size: 12px; font-weight: 650; background: rgba(255,255,255,.2); border-radius: 18px; padding: 4px 10px; }
+  .mk { width: 17px; height: 17px; flex-shrink: 0; }
+  .mk path { fill: none; stroke: #fff; stroke-width: 46; stroke-linecap: round; stroke-linejoin: round; }
+
+  .danger { background: rgba(226,72,72,.16); border: 1px solid rgba(226,72,72,.55); box-shadow: none; color: #ff9c93; }
+  .danger b { color: #ff9c93; }
+  .dangerfill { background: linear-gradient(90deg,#c93030,#e2484f); box-shadow: 0 8px 24px rgba(220,60,60,.35); }
+
+  .split { display: flex; gap: 10px; }
+  .grow { flex: 1; }
+
+  /* v2 stacked link */
+  .textlink { text-align: center; margin-top: 10px; color: #ff9c93; font-size: 12.5px; font-weight: 550; }
+
+  /* v3 split capsule */
+  .capsule { display: flex; height: 48px; border-radius: 24px; overflow: hidden; box-shadow: 0 8px 24px rgba(123,77,255,.42); }
+  .capsule .main { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(90deg,#7b4dff,#a44df0); color: #fff; }
+  .capsule .main b { font-size: 15px; font-weight: 650; }
+  .capsule .seg { width: 58px; display: flex; align-items: center; justify-content: center;
+    background: #8b2f3c; color: #ffb3ab; font-size: 17px; border-left: 1px solid rgba(0,0,0,.25); }
+
+  /* v5 icon square */
+  .iconbtn { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    background: rgba(226,72,72,.16); border: 1px solid rgba(226,72,72,.55); color: #ff9c93; font-size: 18px; flex-shrink: 0; }
+
+  /* v6 danger bar */
+  .dangerbar { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 7px; height: 34px;
+    border-radius: 17px; background: rgba(226,72,72,.10); border: 1px dashed rgba(226,72,72,.45); color: #ff9c93; font-size: 12.5px; font-weight: 550; }
+
+  /* v7 minimal corner */
+  .cornerrow { display: flex; align-items: center; gap: 10px; }
+  .tinylink { color: #8b85a5; font-size: 11.5px; text-align: center; margin-top: 8px; }
+  .tinylink em { font-style: normal; color: #ff9c93; }
+</style>
+</head>
+<body>
+  <h1>Two-Button Sweep — 7 Directions</h1>
+  <div class="sub">Trash is always the hero; permanent delete is the clearly-secondary sibling. Shown in the panel footer.</div>
+
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <path id="sp" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"
+      d="M498 468 L618 468 L618 601 L418 614 L405 368 L738 355 L765 701 L318 734 L285 268"/>
+  </defs></svg>
+
+  <!-- 1 -->
+  <div class="row">
+    <div class="desc"><b>1 · 60/40 side-by-side</b> — gradient hero + outlined red secondary, both labeled</div>
+    <div class="panel"><div class="split">
+      <div class="pill grow" style="flex:1.5"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip">2.7 MB</span></div>
+      <div class="pill danger grow"><b>Delete Forever</b></div>
+    </div></div>
+  </div>
+
+  <!-- 2 -->
+  <div class="row">
+    <div class="desc"><b>2 · Stacked</b> — full-width hero, permanent as a quiet text link beneath</div>
+    <div class="panel">
+      <div class="pill"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip" style="margin-left:auto">2.7 MB</span></div>
+      <div class="textlink">Delete forever instead…</div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="row">
+    <div class="desc"><b>3 · Split capsule</b> — one pill; small divided flame segment on the right is the permanent action</div>
+    <div class="panel"><div class="capsule">
+      <div class="main"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip">2.7 MB</span></div>
+      <div class="seg">🔥</div>
+    </div></div>
+  </div>
+
+  <!-- 4 -->
+  <div class="row">
+    <div class="desc"><b>4 · Equal twins, filled danger</b> — both solid; red fill signals the risky one</div>
+    <div class="panel"><div class="split">
+      <div class="pill grow"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b></div>
+      <div class="pill dangerfill grow"><b>Delete Forever</b></div>
+    </div></div>
+  </div>
+
+  <!-- 5 -->
+  <div class="row">
+    <div class="desc"><b>5 · Hero + icon square</b> — permanent is a compact flame tile; tooltip explains it</div>
+    <div class="panel"><div class="split">
+      <div class="pill grow"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip" style="margin-left:auto">2.7 MB</span></div>
+      <div class="iconbtn">🔥</div>
+    </div></div>
+  </div>
+
+  <!-- 6 -->
+  <div class="row">
+    <div class="desc"><b>6 · Danger bar</b> — hero on top, slim dashed "skips the Trash" bar beneath</div>
+    <div class="panel">
+      <div class="pill"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip" style="margin-left:auto">2.7 MB</span></div>
+      <div class="dangerbar">🔥 Delete Forever · skips the Trash</div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="row">
+    <div class="desc"><b>7 · Minimal footnote</b> — hero only; permanent lives in a fine-print footnote</div>
+    <div class="panel">
+      <div class="pill"><svg class="mk" viewBox="260 242 528 518"><use href="#sp"/></svg><b>Sweep to Trash</b><span class="chip" style="margin-left:auto">2.7 MB</span></div>
+      <div class="tinylink">or <em>delete forever</em> (can't be undone)</div>
+    </div>
+  </div>
+
+</body>
+</html>

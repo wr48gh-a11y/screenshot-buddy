@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sweep Button — Size Treatments</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Helvetica, sans-serif;
+    background: #17121f; color: #eee; padding: 44px 40px 80px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #8b85a5; margin-bottom: 40px; font-size: 14px; }
+  .row { margin-bottom: 34px; max-width: 460px; }
+  .row .desc { font-size: 12.5px; color: #8b85a5; margin-bottom: 10px; }
+  .row .desc b { color: #cfc7e6; font-weight: 650; }
+
+  /* the panel context */
+  .panel { background: linear-gradient(180deg,#241a3d,#1a1330); padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,.06); }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 9px;
+    height: 50px; border-radius: 26px; background: linear-gradient(90deg,#7b4dff,#b44dff);
+    box-shadow: 0 8px 26px rgba(123,77,255,.45); color: #fff; padding: 0 22px; position: relative; }
+  .mark { width: 18px; height: 18px; flex-shrink: 0; }
+  .mark path { fill: none; stroke: #fff; stroke-width: 46; stroke-linecap: round; stroke-linejoin: round; }
+  .main { font-size: 16px; font-weight: 650; letter-spacing: .2px; }
+
+  /* 1 — chip on the right */
+  .b1 { justify-content: space-between; }
+  .b1 .left { display: flex; align-items: center; gap: 9px; }
+  .chip { font-size: 12.5px; font-weight: 650; background: rgba(255,255,255,.20); border-radius: 20px; padding: 4px 11px; letter-spacing: .2px; }
+
+  /* 2 — lighter thin subtext inline */
+  .sub2 { font-size: 15px; font-weight: 400; opacity: .72; }
+  .sep { opacity: .4; font-weight: 300; }
+
+  /* 3 — stacked two lines */
+  .b3 { flex-direction: column; gap: 1px; height: 56px; }
+  .b3 .main { font-size: 15.5px; line-height: 1.1; }
+  .b3 .under { font-size: 11.5px; font-weight: 500; letter-spacing: .6px; text-transform: uppercase; opacity: .68; }
+
+  /* 4 — size right-aligned, faded, own weight */
+  .b4 { justify-content: space-between; }
+  .b4 .left { display: flex; align-items: center; gap: 9px; }
+  .b4 .size { font-size: 14px; font-weight: 500; color: rgba(255,255,255,.66); }
+
+  /* 5 — outlined pill segment on right */
+  .b5 { justify-content: space-between; padding-right: 8px; }
+  .b5 .left { display: flex; align-items: center; gap: 9px; }
+  .seg { font-size: 12.5px; font-weight: 600; border: 1px solid rgba(255,255,255,.45); border-radius: 20px; padding: 5px 12px; }
+</style>
+</head>
+<body>
+  <h1>Sweep Button — “Free 615 KB” Treatments</h1>
+  <div class="sub">Five ways to distinguish the reclaimable size from the “Sweep All” label. Shown on the panel footer.</div>
+
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <path id="sp" fill="none" stroke="#fff" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"
+      d="M498 468 L618 468 L618 601 L418 614 L405 368 L738 355 L765 701 L318 734 L285 268"/>
+  </defs></svg>
+
+  <!-- 1 -->
+  <div class="row">
+    <div class="desc"><b>1 · Pill chip</b> — size sits in a soft translucent chip, clearly a separate object</div>
+    <div class="panel"><div class="btn b1">
+      <div class="left"><svg class="mark" viewBox="260 242 528 518"><use href="#sp"/></svg><span class="main">Sweep All</span></div>
+      <span class="chip">615 KB</span>
+    </div></div>
+  </div>
+
+  <!-- 2 -->
+  <div class="row">
+    <div class="desc"><b>2 · Light inline subtext</b> — same line, but the size is thinner and dimmed</div>
+    <div class="panel"><div class="btn">
+      <svg class="mark" viewBox="260 242 528 518"><use href="#sp"/></svg>
+      <span class="main">Sweep All</span>
+      <span class="sub2"><span class="sep">·&nbsp;</span>frees 615 KB</span>
+    </div></div>
+  </div>
+
+  <!-- 3 -->
+  <div class="row">
+    <div class="desc"><b>3 · Stacked</b> — action on top, reclaim amount as a small caption beneath</div>
+    <div class="panel"><div class="btn b3">
+      <span class="main">Sweep All</span>
+      <span class="under">Frees 615 KB</span>
+    </div></div>
+  </div>
+
+  <!-- 4 -->
+  <div class="row">
+    <div class="desc"><b>4 · Right-aligned amount</b> — “Sweep All” left, size floated right in a lighter weight</div>
+    <div class="panel"><div class="btn b4">
+      <div class="left"><svg class="mark" viewBox="260 242 528 518"><use href="#sp"/></svg><span class="main">Sweep All</span></div>
+      <span class="size">615 KB</span>
+    </div></div>
+  </div>
+
+  <!-- 5 -->
+  <div class="row">
+    <div class="desc"><b>5 · Outlined segment</b> — size in a bordered pill, like a tag</div>
+    <div class="panel"><div class="btn b5">
+      <div class="left"><svg class="mark" viewBox="260 242 528 518"><use href="#sp"/></svg><span class="main">Sweep All</span></div>
+      <span class="seg">615 KB</span>
+    </div></div>
+  </div>
+
+</body>
+</html>

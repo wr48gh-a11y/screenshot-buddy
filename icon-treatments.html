@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Screenshot Buddy — Icon Treatments</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", Helvetica, sans-serif;
+    background: #0c0a16; color: #eee; padding: 48px 32px 90px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #8b85a5; margin-bottom: 40px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .card { border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.06); }
+  /* the welcome-screen backdrop so each treatment is judged in context */
+  .stage { height: 240px; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse 80% 62% at 50% 118%, #2c1a5e 0%, #241a4d 46%, #120c26 100%); }
+  .label { padding: 14px 18px; background: #16121f; }
+  .label b { font-size: 14px; font-weight: 650; display: block; }
+  .label span { font-size: 12px; color: #8b85a5; }
+  svg.mark { display: block; }
+</style>
+</head>
+<body>
+  <h1>Screenshot Buddy — Logo Treatments</h1>
+  <div class="sub">The same spiral mark, seven ways, each shown on the welcome-screen background. #1 is the current build.</div>
+
+  <!-- shared SVG defs -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="spiral" viewBox="0 0 1024 1024">
+        <path fill="none" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"
+          d="M498 468 L618 468 L618 601 L418 614 L405 368 L738 355 L765 701 L318 734 L285 268"/>
+      </symbol>
+      <linearGradient id="pill" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7b4dff"/><stop offset="1" stop-color="#b44dff"/>
+      </linearGradient>
+      <radialGradient id="orbFill" cx="35%" cy="30%" r="75%">
+        <stop offset="0" stop-color="#8f6cff"/><stop offset="60%" stop-color="#5636c9"/><stop offset="100%" stop-color="#2c1b72"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <div class="grid">
+
+    <!-- 1. Current: glowing orb -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="52" fill="url(#orbFill)" style="filter:drop-shadow(0 0 26px rgba(123,77,255,.6))"/>
+          <use href="#spiral" x="34" y="34" width="62" height="62" stroke="#fff"/>
+        </svg>
+      </div>
+      <div class="label"><b>1 · Glowing Orb</b><span>Current build — soft purple sphere, white mark</span></div>
+    </div>
+
+    <!-- 2. App-icon tile -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="130" height="130" viewBox="0 0 130 130">
+          <rect x="20" y="20" width="90" height="90" rx="24" fill="#FAF9F5" style="filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))"/>
+          <use href="#spiral" x="37" y="37" width="56" height="56" stroke="#7B4DFF"/>
+        </svg>
+      </div>
+      <div class="label"><b>2 · App-Icon Tile</b><span>Matches the Dock/Finder icon — off-white squircle</span></div>
+    </div>
+
+    <!-- 3. Glassmorphic -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="52" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+          <circle cx="50" cy="46" r="30" fill="rgba(255,255,255,0.10)"/>
+          <use href="#spiral" x="34" y="34" width="62" height="62" stroke="#fff"/>
+        </svg>
+      </div>
+      <div class="label"><b>3 · Frosted Glass</b><span>Translucent disc, hairline border — very macOS</span></div>
+    </div>
+
+    <!-- 4. Gradient ring, open center -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="52" fill="none" stroke="url(#pill)" stroke-width="4"/>
+          <use href="#spiral" x="34" y="34" width="62" height="62" stroke="url(#pill)"/>
+        </svg>
+      </div>
+      <div class="label"><b>4 · Gradient Ring</b><span>Open center, gradient outline + gradient mark</span></div>
+    </div>
+
+    <!-- 5. Gradient squircle (iOS style) -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="130" height="130" viewBox="0 0 130 130">
+          <rect x="20" y="20" width="90" height="90" rx="26" fill="url(#pill)" style="filter:drop-shadow(0 10px 22px rgba(123,77,255,.5))"/>
+          <use href="#spiral" x="37" y="37" width="56" height="56" stroke="#fff"/>
+        </svg>
+      </div>
+      <div class="label"><b>5 · Gradient Squircle</b><span>Purple iOS-style tile, white mark</span></div>
+    </div>
+
+    <!-- 6. Bare mark, gradient stroke -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="150" height="150" viewBox="0 0 150 150">
+          <use href="#spiral" x="20" y="20" width="110" height="110" stroke="url(#pill)"/>
+        </svg>
+      </div>
+      <div class="label"><b>6 · Bare Mark</b><span>No container — large gradient-stroked spiral</span></div>
+    </div>
+
+    <!-- 7. Spotlight -->
+    <div class="card">
+      <div class="stage">
+        <svg class="mark" width="170" height="170" viewBox="0 0 170 170">
+          <circle cx="85" cy="85" r="70" fill="url(#orbFill)" opacity="0.35" style="filter:blur(22px)"/>
+          <use href="#spiral" x="47" y="47" width="76" height="76" stroke="#fff"/>
+        </svg>
+      </div>
+      <div class="label"><b>7 · Spotlight Glow</b><span>Edgeless — mark floats in a soft purple halo</span></div>
+    </div>
+
+  </div>
+</body>
+</html>
