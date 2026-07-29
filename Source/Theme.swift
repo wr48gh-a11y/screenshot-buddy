@@ -11,6 +11,14 @@ enum Theme {
     static let accent2 = Color(red: 0.706, green: 0.302, blue: 1.0)     // #b44dff
     static let textDim = Color(red: 0.725, green: 0.682, blue: 0.902)   // #b9aee6
 
+    // Destructive / error treatment — shared by the inline rename/trash error captions and
+    // the "Delete Forever" button style, so they can't drift apart.
+    static let errorText = Color(red: 1.0, green: 0.61, blue: 0.58)
+    static let destructive = Color(red: 0.886, green: 0.282, blue: 0.282)
+
+    // Near-white used for the BuddyMark stroke in the empty state.
+    static let nearWhite = Color(red: 0.980, green: 0.976, blue: 0.961)
+
     static var background: LinearGradient {
         LinearGradient(colors: [bgTop, bgMid, bgBottom], startPoint: .top, endPoint: .bottom)
     }
@@ -65,6 +73,9 @@ struct BuddyMark: Shape {
 extension BuddyMark {
     /// A template NSImage of the mark, cropped tight to its outline so it fills
     /// the full menu-bar height (like the Evernote/Dropbox glyphs).
+    ///
+    /// Prefer `menuBarIcon` (the cached default-height instance) from SwiftUI body closures,
+    /// which re-render frequently. Use this method only when you need a non-default size.
     static func menuBarImage(height: CGFloat = 18) -> NSImage {
         let g = BuddyGlyph.self
         let scale = height / g.height
@@ -89,6 +100,12 @@ extension BuddyMark {
         image.isTemplate = true
         return image
     }
+
+    /// The default-height (18pt) menu-bar icon, built once and reused. SwiftUI's
+    /// `MenuBarExtra` label closure re-renders frequently, and rebuilding the NSImage from a
+    /// bezier path on every render is wasteful. Swift's `static let` initializer is lazily
+    /// constructed once and thread-safe.
+    static let menuBarIcon: NSImage = menuBarImage(height: 18)
 }
 
 // MARK: - Button styles

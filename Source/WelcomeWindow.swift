@@ -3,6 +3,9 @@ import AppKit
 
 // MARK: - Welcome (Concept C — cinematic)
 
+/// `@MainActor`: this is AppKit window management that reads/writes the `@MainActor` store
+/// (checking `folderURL`, calling `chooseFolder`). Window code always runs on main.
+@MainActor
 enum WelcomeWindow {
     private static var window: NSWindow?
 

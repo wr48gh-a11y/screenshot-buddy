@@ -7,14 +7,14 @@ import UniformTypeIdentifiers
 struct ScreenshotCell: View {
     @EnvironmentObject var store: ScreenshotStore
     let url: URL
-    @ObservedObject private var quickLook = QuickLook.shared
     @State private var renaming = false
     @State private var newName = ""
     @State private var renameError: String?
+    @State private var trashError = false
     @State private var hovering = false
     @FocusState private var nameFocused: Bool
 
-    private var isSelected: Bool { quickLook.selection == url }
+    private var isSelected: Bool { store.selection == url }
 
     var body: some View {
         VStack(spacing: 5) {
@@ -41,7 +41,7 @@ struct ScreenshotCell: View {
                 if let renameError {
                     Text(renameError)
                         .font(.caption2)
-                        .foregroundStyle(Color(red: 1.0, green: 0.61, blue: 0.58))
+                        .foregroundStyle(Theme.errorText)
                         .frame(width: ThumbnailView.width)
                         .transition(.opacity)
                 }
@@ -52,6 +52,14 @@ struct ScreenshotCell: View {
                     .foregroundStyle(isSelected ? .white : Theme.textDim)
                     .frame(width: ThumbnailView.width)
                     .onTapGesture { beginRename() }
+                if trashError {
+                    Text("Couldn't move to Trash — file may be in use.")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.errorText)
+                        .frame(width: ThumbnailView.width)
+                        .multilineTextAlignment(.center)
+                        .transition(.opacity)
+                }
             }
         }
         .padding(6)
@@ -60,23 +68,30 @@ struct ScreenshotCell: View {
                 .fill(hovering && !isSelected ? Color.white.opacity(0.08) : .clear)
         )
         .onHover { hovering = $0 }
+        .onChange(of: store.selection) { _, _ in
+            if trashError { withAnimation { trashError = false } }
+        }
         .help(url.lastPathComponent)
         .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
         .gesture(TapGesture(count: 2).onEnded { NSWorkspace.shared.open(url) })
-        .simultaneousGesture(TapGesture(count: 1).onEnded { quickLook.selection = url })
+        .simultaneousGesture(TapGesture(count: 1).onEnded { store.select(url) })
         .contextMenu {
-            Button("Quick Look") { quickLook.toggle(url, in: store.files) }
+            Button("Quick Look") { store.toggleQuickLook(url) }
             Button("Open") { NSWorkspace.shared.open(url) }
             Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([url]) }
             Button("Rename") { beginRename() }
             Divider()
-            Button("Move to Trash", role: .destructive) { store.moveToTrash(url) }
+            Button("Move to Trash", role: .destructive) {
+                let ok = store.moveToTrash(url)
+                if !ok { withAnimation { trashError = true } }
+            }
         }
     }
 
     private func beginRename() {
         newName = url.deletingPathExtension().lastPathComponent
         renameError = nil
+        trashError = false
         renaming = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { nameFocused = true }
     }
@@ -92,6 +107,8 @@ struct ScreenshotCell: View {
             renameError = "A file with that name already exists"
         case .invalidCharacters:
             renameError = "Name can't contain / or :"
+        case .inUse:
+            renameError = "Couldn't rename — file may be in use"
         }
     }
 }

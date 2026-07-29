@@ -8,7 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         WelcomeWindow.showIfNeeded(store: .shared)
     }
     func applicationWillTerminate(_ notification: Notification) {
-        ScreenshotStore.shared.purgeSweep()   // finalize any pending sweep on quit
+        ScreenshotStore.shared.restoreOnQuit()   // honor the undo window, don't purge on quit
     }
 }
 
@@ -22,7 +22,7 @@ struct ScreenshotBuddyApp: App {
             PanelView()
                 .environmentObject(store)
         } label: {
-            Image(nsImage: BuddyMark.menuBarImage(height: 18))
+            Image(nsImage: BuddyMark.menuBarIcon)
         }
         .menuBarExtraStyle(.window)
     }

@@ -1,6 +1,5 @@
 import SwiftUI
 import AppKit
-import Quartz
 
 // MARK: - Main panel
 
@@ -167,7 +166,7 @@ struct PanelView: View {
             } else if store.files.isEmpty {
                 VStack(spacing: 8) {
                     BuddyMark()
-                        .stroke(Color(red: 0.980, green: 0.976, blue: 0.961),
+                        .stroke(Theme.nearWhite,
                                 style: StrokeStyle(lineWidth: 3.4, lineCap: .round, lineJoin: .round))
                         .frame(width: 52, height: 52)
                         .padding(.bottom, 4)
@@ -198,13 +197,13 @@ struct PanelView: View {
                 .focusable()
                 .focusEffectDisabled()
                 .onKeyPress(.space) {
-                    if let sel = QuickLook.shared.selection ?? store.files.first {
-                        QuickLook.shared.toggle(sel, in: store.files)
+                    if let sel = store.selection ?? store.files.first {
+                        store.toggleQuickLook(sel)
                     }
                     return .handled
                 }
-                .onKeyPress(.rightArrow) { moveSelection(1); return .handled }
-                .onKeyPress(.leftArrow) { moveSelection(-1); return .handled }
+                .onKeyPress(.rightArrow) { store.moveSelection(by: 1); return .handled }
+                .onKeyPress(.leftArrow) { store.moveSelection(by: -1); return .handled }
             }
         }
     }
@@ -257,16 +256,6 @@ struct PanelView: View {
         .padding(.vertical, 12)
     }
 
-    private func moveSelection(_ delta: Int) {
-        guard !store.files.isEmpty else { return }
-        let current = QuickLook.shared.selection.flatMap { store.files.firstIndex(of: $0) } ?? -delta
-        let next = min(max(current + delta, 0), store.files.count - 1)
-        QuickLook.shared.selection = store.files[next]
-        if let panel = QLPreviewPanel.shared(), panel.isVisible {
-            panel.currentPreviewItemIndex = next
-        }
-    }
-
     private var settingsMenu: some View {
         Menu {
             Button("Change Folder…") { store.chooseFolder() }
@@ -288,20 +277,16 @@ struct PanelView: View {
 /// Outlined red capsule used for secondary destructive actions (e.g. "Delete Forever").
 /// Kept separate from PillButtonStyle so the two hero/secondary treatments can't drift.
 struct DestructiveOutlineButtonStyle: ButtonStyle {
-    private static let label = Color(red: 1.0, green: 0.61, blue: 0.58)
-    private static let fill = Color(red: 0.886, green: 0.282, blue: 0.282)
-    private static let stroke = Color(red: 0.886, green: 0.282, blue: 0.282)
-
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 13.5, weight: .semibold))
             .lineLimit(1)
-            .foregroundStyle(Self.label)
+            .foregroundStyle(Theme.errorText)
             .padding(.vertical, 12)
             .background(
                 Capsule()
-                    .fill(Self.fill.opacity(0.16))
-                    .overlay(Capsule().strokeBorder(Self.stroke.opacity(0.55), lineWidth: 1))
+                    .fill(Theme.destructive.opacity(0.16))
+                    .overlay(Capsule().strokeBorder(Theme.destructive.opacity(0.55), lineWidth: 1))
             )
             .opacity(configuration.isPressed ? 0.8 : 1)
     }

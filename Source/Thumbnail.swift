@@ -3,20 +3,38 @@ import AppKit
 import QuickLookThumbnailing
 
 /// Loads a single thumbnail via the system Quick Look generator.
+///
+/// Holds the in-flight request so it can be cancelled when the cell scrolls off-screen,
+/// preventing a backlog of thumbnail jobs (and outdated images flashing in) during fast
+/// scrolling through a large folder.
 final class ThumbnailLoader: ObservableObject {
     @Published var image: NSImage?
     @Published private(set) var isLoading = false
+    private var request: QLThumbnailGenerator.Request?
+
     func load(url: URL, size: CGFloat) {
+        cancel()
         isLoading = true
-        let request = QLThumbnailGenerator.Request(
+        let req = QLThumbnailGenerator.Request(
             fileAt: url, size: CGSize(width: size, height: size),
             scale: NSScreen.main?.backingScaleFactor ?? 2, representationTypes: .thumbnail)
-        QLThumbnailGenerator.shared.generateBestRepresentation(for: request) { [weak self] rep, _ in
+        request = req
+        QLThumbnailGenerator.shared.generateBestRepresentation(for: req) { [weak self] rep, _ in
             DispatchQueue.main.async {
                 self?.image = rep?.nsImage
                 self?.isLoading = false
+                self?.request = nil
             }
         }
+    }
+
+    /// Cancel any in-flight generation. Safe to call when nothing is loading.
+    func cancel() {
+        if let request {
+            QLThumbnailGenerator.shared.cancel(request)
+            self.request = nil
+        }
+        isLoading = false
     }
 }
 
@@ -51,6 +69,7 @@ struct ThumbnailView: View {
         .frame(width: Self.width, height: Self.height)
         .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
         .onAppear { loader.load(url: url, size: Self.width) }
+        .onDisappear { loader.cancel() }
         .id(url)
     }
 }
