@@ -5,7 +5,12 @@ import AppKit
 
 struct PanelView: View {
     @EnvironmentObject var store: ScreenshotStore
-    struct SweepResult: Equatable { let count: Int; let permanent: Bool; let failed: Int }
+    /// Singleton that outlives the view, so `@ObservedObject` rather than `@StateObject`.
+    @ObservedObject private var launchAtLogin = LaunchAtLogin.shared
+    /// `offerLogin` rides along in the result (rather than living in its own `@State`) so the
+    /// auto-dismiss `.task(id:)` re-runs when it changes and can skip dismissing while the
+    /// offer is on screen.
+    struct SweepResult: Equatable { let count: Int; let permanent: Bool; let failed: Int; let offerLogin: Bool }
     @State private var sweepResult: SweepResult?
 
     var body: some View {
@@ -25,6 +30,8 @@ struct PanelView: View {
         .frame(width: 424)
         .background(Theme.background)
         .environment(\.colorScheme, .dark)
+        // The user can flip this in System Settings while we're closed, so re-read on open.
+        .onAppear { launchAtLogin.refresh() }
     }
 
     // No folder connected: a real, escapable panel (Connect + gear with Quit).
@@ -153,11 +160,15 @@ struct PanelView: View {
                         .buttonStyle(.plain)
                         .padding(.top, 2)
                     }
+                    if result.offerLogin { launchAtLoginOffer }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 36)
+                .padding(.vertical, result.offerLogin ? 24 : 36)
                 .transition(.opacity)
                 .task(id: result) {
+                    // Don't time out a question. While the offer is up the confirmation stays
+                    // put; answering it is what dismisses.
+                    guard !result.offerLogin else { return }
                     // Purge is handled by a store-owned timer, so it happens even if the panel
                     // closes. This task only controls how long the confirmation stays visible.
                     try? await Task.sleep(nanoseconds: result.permanent ? 5_000_000_000 : 4_000_000_000)
@@ -208,11 +219,58 @@ struct PanelView: View {
         }
     }
 
+    /// One-time nudge, shown on the sweep confirmation — the moment the app has just proved its
+    /// worth. Deliberately not offered after "Delete Forever", where it would compete with the
+    /// time-boxed Undo.
+    private var launchAtLoginOffer: some View {
+        VStack(spacing: 4) {
+            Divider()
+                .padding(.horizontal, 60)
+                .padding(.bottom, 12)
+            Text("Keep Screenshot Buddy handy?")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+            Text("It'll be in your menu bar whenever you log in.")
+                .font(.caption)
+                .foregroundStyle(Theme.textDim)
+            HStack(spacing: 8) {
+                Button {
+                    launchAtLogin.declineOffer()
+                    withAnimation { sweepResult = nil }
+                } label: {
+                    Text("Not Now")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.textDim)
+                        .padding(.vertical, 7)
+                        .padding(.horizontal, 16)
+                }
+                .buttonStyle(.plain)
+                Button {
+                    launchAtLogin.acceptOffer()
+                    withAnimation { sweepResult = nil }
+                } label: {
+                    Text("Open at Login")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.vertical, 7)
+                        .padding(.horizontal, 18)
+                        .background(Capsule().fill(Theme.pill))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.top, 10)
+        }
+        .padding(.top, 6)
+    }
+
     private var footer: some View {
         HStack(spacing: 10) {
             Button {
                 let outcome = store.sweepAllToTrash()
-                withAnimation { sweepResult = .init(count: outcome.moved, permanent: false, failed: outcome.failed) }
+                withAnimation {
+                    sweepResult = .init(count: outcome.moved, permanent: false, failed: outcome.failed,
+                                        offerLogin: outcome.moved > 0 && launchAtLogin.shouldOffer)
+                }
             } label: {
                 HStack(spacing: 8) {
                     BuddyMark()
@@ -241,7 +299,10 @@ struct PanelView: View {
 
             Button {
                 let outcome = store.deleteAll()
-                withAnimation { sweepResult = .init(count: outcome.moved, permanent: true, failed: outcome.failed) }
+                withAnimation {
+                    sweepResult = .init(count: outcome.moved, permanent: true, failed: outcome.failed,
+                                        offerLogin: false)
+                }
             } label: {
                 Text("Delete Forever")
                     .frame(maxWidth: .infinity)
@@ -258,6 +319,16 @@ struct PanelView: View {
 
     private var settingsMenu: some View {
         Menu {
+            Toggle("Open at Login", isOn: Binding(
+                get: { launchAtLogin.isEnabled },
+                set: { launchAtLogin.set($0) }))
+            if launchAtLogin.requiresApproval {
+                Button("Approve in Login Items…") { LaunchAtLogin.openLoginItemsSettings() }
+            }
+            if let error = launchAtLogin.lastError {
+                Text("Couldn't change login item: \(error)")
+            }
+            Divider()
             Button("Change Folder…") { store.chooseFolder() }
             Divider()
             Button("About Screenshot Buddy") { AboutWindow.show() }

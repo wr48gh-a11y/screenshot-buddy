@@ -18,6 +18,15 @@ Sweep to Trash moves everything to the macOS Trash, so you can recover files the
 **How do I change the folder?**
 Click the menu bar icon → gear → **Change Folder…**
 
+**How do I start Screenshot Buddy automatically when I log in?**
+Click the menu bar icon → gear → tick **Open at Login**. We'll also offer this once after your first sweep.
+
+**How do I stop it launching at login?**
+Untick the same **Open at Login** item in the gear menu. You can also turn it off in System Settings → General → Login Items & Extensions, under "Open at Login" — either place works, and the gear menu always reflects the current setting.
+
+**I ticked "Open at Login" but macOS says it needs approval.**
+Some Macs hold new login items until you allow them. The gear menu will show **Approve in Login Items…** — click it to jump straight to the right settings pane, then switch Screenshot Buddy on.
+
 **Does Screenshot Buddy send my screenshots anywhere?**
 Never. Everything happens on your Mac. See our Privacy Policy.
 
