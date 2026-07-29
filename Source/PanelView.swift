@@ -204,7 +204,10 @@ struct PanelView: View {
                     // Always open at the top (newest shots), never at last session's scroll position.
                     .onAppear { proxy.scrollTo("grid-top", anchor: .top) }
                 }
-                .frame(maxHeight: 380)
+                // A ScrollView has no intrinsic height, and a MenuBarExtra window sizes itself
+                // to its content's ideal size — so maxHeight alone lets the grid collapse to
+                // zero. Give it a concrete, content-aware height instead (capped at 380).
+                .frame(height: gridHeight)
                 .focusable()
                 .focusEffectDisabled()
                 .onKeyPress(.space) {
@@ -217,6 +220,17 @@ struct PanelView: View {
                 .onKeyPress(.leftArrow) { store.moveSelection(by: -1); return .handled }
             }
         }
+    }
+
+    /// Height for the screenshot grid: exactly fits the rows present, capped so a huge
+    /// folder scrolls instead of growing the panel past the screen.
+    private var gridHeight: CGFloat {
+        // Cell = thumbnail (108) + spacing (5) + caption (~17) + cell padding (12).
+        let rowHeight: CGFloat = 142
+        let rows = CGFloat((store.files.count + 1) / 2)
+        let spacing: CGFloat = 8 * max(0, rows - 1)
+        let gridPadding: CGFloat = 24   // 12 top + 12 bottom
+        return min(380, rows * rowHeight + spacing + gridPadding)
     }
 
     /// One-time nudge, shown on the sweep confirmation — the moment the app has just proved its
