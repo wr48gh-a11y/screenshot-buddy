@@ -9,7 +9,7 @@ settings:
   base:
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
-    DEVELOPMENT_TEAM: ""          # set to your Team ID once the Apple account is approved
+    DEVELOPMENT_TEAM: "GN7N7785WD"
     CODE_SIGN_STYLE: Automatic
 
 targets:

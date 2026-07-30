@@ -2,11 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Mac App Store distribution. Fill in teamID once the Developer account is active. -->
+	<!-- Mac App Store distribution. -->
 	<key>method</key>
 	<string>app-store</string>
 	<key>teamID</key>
-	<string>REPLACE_WITH_TEAM_ID</string>
+	<string>GN7N7785WD</string>
 	<key>destination</key>
 	<string>export</string>
 	<key>signingStyle</key>

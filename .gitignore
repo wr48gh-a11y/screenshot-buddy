@@ -8,3 +8,8 @@ ScreenshotBuddy.xcodeproj/
 
 # Business paperwork with personal info — keep out of the repo
 admin/
+
+.DS_Store
+
+# Regenerated from marketing/assets/ + thumbsrc.py — run `python3 thumbsrc.py` to rebuild
+marketing/thumbsrc/
