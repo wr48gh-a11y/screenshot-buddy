@@ -13,3 +13,5 @@ admin/
 
 # Regenerated from marketing/assets/ + thumbsrc.py — run `python3 thumbsrc.py` to rebuild
 marketing/thumbsrc/
+
+__pycache__/
