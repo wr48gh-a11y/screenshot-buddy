@@ -14,10 +14,14 @@
 	<string>ScreenshotBuddy</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- Fed from project.yml (MARKETING_VERSION / CURRENT_PROJECT_VERSION) so the build
+	     number has exactly one source of truth. These were previously hardcoded, which meant
+	     bumping project.yml silently shipped the old number and App Store Connect would
+	     reject the upload as a duplicate. -->
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSMinimumSystemVersion</key>
