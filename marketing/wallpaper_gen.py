@@ -1,84 +1,241 @@
 #!/usr/bin/env python3
-"""Render the desktop wallpaper behind the App Store marketing shots.
+"""Generate an original macOS-style abstract wallpaper for marketing screenshots.
 
-Original artwork, generated procedurally — nothing traced from or derived from Apple's
-wallpapers. Composed as a stack of soft radial blooms over a near-black violet base, so
-there are no hard stops anywhere; a single gradient with an abrupt stop reads as a seam
-across the image and instantly kills the illusion of a photographed desktop.
+COMPOSITION RULES (these are what make it read as a desktop rather than a poster):
 
-The composition is driven entirely by what sits on top of it in gen.py:
-  - The menu bar runs across the very top, so the top strip stays near-black for contrast.
-  - The panel hangs off the top-right, so that corner is darkened hard and kept empty.
-  - The headline sits mid-left over the background, so the left side stays dark enough for
-    white type to hold. The brightest bloom is pushed BELOW it, into the bottom edge, where
-    nothing overlaps.
+1. The headline sits at left:78px, width 590px, vertically centred (see gen.py's `.head`),
+   which in this 2560x1600 space is roughly x 150-1340, y 600-1000. That region is kept
+   DARK. The previous version put its brightest violet bloom at x=420, directly underneath
+   the headline, and `.head h1 em` is a #9b6dff->#d98aff gradient: same hue, similar
+   lightness, so the words disappeared into the background. Colour now lives bottom-right,
+   and a dedicated dark scrim (`make_text_scrim`) guarantees the contrast no matter how the
+   glow is retuned.
 
-Renders through headless Chrome, matching gen.py — neither Pillow nor numpy is installed
-here, and CSS gradients composite without banding for free.
+2. Atmosphere is built from wide, heavily blurred RADIAL blooms, never from stroked paths.
+   The old version drew 310px-wide bezier strokes and blurred them; a constant-width stroke
+   still reads as a tube however much you blur it, which is what made the result look like a
+   wireframe. Light has no constant width.
 
-Output: assets/wallpaper.png at 2560x1600 (1280x800 logical @2x).
-"""
-import subprocess, pathlib
+3. The app panel occupies roughly x 1630-2510, y 70-1220. Glow is kept below and around it
+   so the panel edge stays crisp against a darker field.
 
-OUT = pathlib.Path(__file__).parent
-CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-
-BASE = "#100d1e"        # near-black violet the whole image sits on
-GLOW = "123,77,255"     # #7B4DFF — the app's signature violet
-LIFT = "180,77,255"     # #B44DFF — its lighter partner, used sparingly
-
-# Ordered front to back, the way CSS composites multiple backgrounds. Every layer fades to
-# transparent well inside its own bounds so nothing ever meets an edge abruptly.
-LAYERS = [
-    # Darkening passes, listed first so they sit ON TOP of the color.
-    "linear-gradient(180deg, rgba(4,3,10,.92) 0%, rgba(4,3,10,.55) 9%, rgba(4,3,10,0) 26%)",
-    "radial-gradient(ellipse 62% 78% at 101% -8%, rgba(4,3,10,.82) 0%, rgba(4,3,10,.35) 45%, rgba(4,3,10,0) 72%)",
-    "radial-gradient(ellipse 85% 60% at 50% 46%, rgba(4,3,10,.30) 0%, rgba(4,3,10,0) 68%)",
-    # Light. The big bloom is low and left; a smaller one balances it centre-right.
-    f"radial-gradient(ellipse 62% 52% at 16% 104%, rgba({GLOW},.62) 0%, rgba({GLOW},.22) 42%, rgba({GLOW},0) 72%)",
-    f"radial-gradient(ellipse 46% 34% at 62% 116%, rgba({LIFT},.42) 0%, rgba({LIFT},0) 70%)",
-    "radial-gradient(ellipse 34% 46% at -6% 62%, rgba(96,64,210,.38) 0%, rgba(96,64,210,0) 70%)",
-    f"radial-gradient(ellipse 40% 26% at 84% 88%, rgba({GLOW},.20) 0%, rgba({GLOW},0) 72%)",
-    # A faint cool cast up top keeps the dark half from going flat grey.
-    "radial-gradient(ellipse 70% 40% at 34% 8%, rgba(58,44,132,.30) 0%, rgba(58,44,132,0) 70%)",
-    BASE,
-]
-
-# Two blurred ribbons give the flow that pure radials can't — without them the result reads
-# as a vignette rather than a wallpaper. Blurred far past their own size so no edge survives.
-RIBBONS = """
-.ribbon { position:absolute; border-radius:50%; filter:blur(90px); mix-blend-mode:screen; }
-.r1 { left:-14%; top:58%; width:86%; height:30%; background:rgba(123,77,255,.34); transform:rotate(-13deg); }
-.r2 { left:26%;  top:80%; width:70%; height:24%; background:rgba(180,77,255,.22); transform:rotate(-6deg); }
-.r3 { left:-8%;  top:34%; width:44%; height:16%; background:rgba(96,64,210,.20); transform:rotate(-18deg); }
+The renderer is ImageMagick, which keeps the script self-contained even without Pillow or
+NumPy in the environment.
 """
 
-# feTurbulence grain. Large flat gradients band visibly on a retina panel; a couple of
-# percent of noise breaks the bands up without reading as texture.
-GRAIN = """<svg class="grain" xmlns="http://www.w3.org/2000/svg">
-  <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
-  <feColorMatrix type="saturate" values="0"/></filter>
-  <rect width="100%" height="100%" filter="url(#n)"/></svg>"""
+from __future__ import annotations
 
-HTML = f"""<!DOCTYPE html><html><head><meta charset='utf-8'><style>
-* {{ margin:0; padding:0; }}
-html,body {{ width:1280px; height:800px; overflow:hidden; }}
-body {{ position:relative; background:{', '.join(LAYERS)}; }}
-{RIBBONS}
-.grain {{ position:absolute; inset:0; width:100%; height:100%; opacity:.035; pointer-events:none; }}
-</style></head><body>
-<div class="ribbon r3"></div><div class="ribbon r1"></div><div class="ribbon r2"></div>
-{GRAIN}
-</body></html>"""
+import pathlib
+import shutil
+import subprocess
+import tempfile
+
+
+WIDTH = 2560
+HEIGHT = 1600
+
+# Tuning knobs.
+BASE_TOP = "#07060f"
+BASE_BOTTOM = "#160f2b"
+VIOLET = "#7B4DFF"
+MAGENTA = "#B44DFF"
+DEEP_BLUE = "#142b66"
+EMBER = "#d7b7ff"
+
+TOP_FADE_ALPHA = 0.84
+TOP_RIGHT_ALPHA = 0.95
+# How hard the headline area is protected. Raise if copy ever moves or grows.
+TEXT_SCRIM_ALPHA = 0.62
+# Grain does double duty: texture, and dithering away the banding that 8-bit gradients
+# show across a field this large and this smooth.
+GRAIN_STRENGTH = 0.022
+
+OUT = pathlib.Path(__file__).with_name("assets") / "wallpaper.png"
+
+
+def chromeless_magick() -> str:
+    candidates = [shutil.which("magick"), shutil.which("convert")]
+    for candidate in candidates:
+        if candidate and pathlib.Path(candidate).exists():
+            return candidate
+    raise FileNotFoundError("Could not find an ImageMagick binary for rendering.")
+
+
+def run_magick(*args: object) -> None:
+    subprocess.run(
+        [chromeless_magick(), *map(str, args)],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def rgba(hex_color: str, alpha: float) -> str:
+    h = hex_color.lstrip("#")
+    a = max(0, min(255, round(alpha * 255)))
+    return f"#{h}{a:02X}"
+
+
+def ellipse(cx: int, cy: int, rx: int, ry: int) -> str:
+    return f"ellipse {cx},{cy} {rx},{ry} 0,360"
+
+
+# Blurs this wide are the whole point of the look, but a sigma-300 gaussian across
+# 2560x1600 takes minutes and still bands. Shrinking first, blurring in the small space,
+# then scaling back up is both far faster and SMOOTHER: the upscale interpolates, which
+# dithers away the terracing a full-resolution blur leaves behind.
+BLUR_SCALE = 8
+
+
+def soft(path: pathlib.Path, sigma: float, *draw_args: object) -> None:
+    """Draw shapes at full size, then blur them via the shrink/grow trick."""
+    small_w, small_h = WIDTH // BLUR_SCALE, HEIGHT // BLUR_SCALE
+    run_magick(
+        "-size", f"{WIDTH}x{HEIGHT}", "xc:none",
+        *draw_args,
+        "-resize", f"{small_w}x{small_h}!",
+        "-blur", f"0x{sigma / BLUR_SCALE:.2f}",
+        "-resize", f"{WIDTH}x{HEIGHT}!",
+        path,
+    )
+
+
+def make_base(path: pathlib.Path) -> None:
+    # A restrained top-to-bottom base gradient keeps the top strip dark enough for menu bar text.
+    run_magick("-size", f"{WIDTH}x{HEIGHT}", f"gradient:{BASE_TOP}-{BASE_BOTTOM}", path)
+
+
+def make_top_fade(path: pathlib.Path) -> None:
+    soft(
+        path, 80,
+        "-fill", rgba("#04040b", TOP_FADE_ALPHA),
+        "-draw", f"rectangle 0,0 {WIDTH},250",
+    )
+
+
+def make_top_right_shadow(path: pathlib.Path) -> None:
+    soft(
+        path, 150,
+        "-fill", rgba("#03040a", TOP_RIGHT_ALPHA),
+        "-draw", ellipse(2240, 210, 820, 560),
+        "-fill", rgba("#04040b", 0.74),
+        "-draw", ellipse(2460, 120, 560, 360),
+    )
+
+
+def make_glow(path: pathlib.Path) -> None:
+    """The colour field: a low aurora sitting along the bottom-right.
+
+    Every centre is at or below y=1400 and right of x=1050, so the light rises INTO frame
+    from beneath rather than blooming behind the headline. Radii are deliberately enormous
+    relative to the canvas; that plus the 300px blur is what separates 'atmosphere' from
+    'a shape someone drew'.
+    """
+    soft(
+        path, 300,
+        # Main violet mass. Centre sits well below the frame so only its dim outer falloff
+        # is visible: pushing the hot core off-canvas is what stops the bottom edge looking
+        # like a bright strip that got cropped.
+        "-fill", rgba(VIOLET, 0.68),
+        "-draw", ellipse(1500, 1880, 1220, 700),
+        # Three offset lobes at differing heights. A single ellipse gives a perfect arc,
+        # which reads as geometry; overlapping lobes give the uneven crest real aurorae have.
+        "-fill", rgba(VIOLET, 0.30),
+        "-draw", ellipse(980, 1780, 700, 520),
+        "-fill", rgba(MAGENTA, 0.34),
+        "-draw", ellipse(1980, 1810, 820, 560),
+        "-fill", rgba(MAGENTA, 0.22),
+        "-draw", ellipse(2420, 1640, 620, 420),
+        # A dimmer, higher band on the right, layered above the main mass so the glow has
+        # depth rather than being one wall of light.
+        "-fill", rgba(MAGENTA, 0.16),
+        "-draw", ellipse(2020, 1320, 700, 300),
+        # Cool counterweight so the field is not a single flat hue.
+        "-fill", rgba(DEEP_BLUE, 0.40),
+        "-draw", ellipse(1150, 1520, 780, 460),
+        "-fill", rgba(DEEP_BLUE, 0.24),
+        "-draw", ellipse(1720, 1400, 560, 300),
+        # Small bright core, keeps the aurora from reading as uniform haze.
+        "-fill", rgba(EMBER, 0.12),
+        "-draw", ellipse(1700, 1700, 420, 240),
+    )
+
+
+def make_far_accent(path: pathlib.Path) -> None:
+    """A whisper of violet in the upper left.
+
+    Without this the left half is dead flat once the scrim lands. Alpha is kept very low:
+    it is there to stop the corner reading as empty, not to be noticed.
+    """
+    soft(
+        path, 320,
+        # Upper-left violet. Enough to keep the corner alive under the scrim, not enough to
+        # compete with the headline that sits just below it.
+        "-fill", rgba(VIOLET, 0.26),
+        "-draw", ellipse(180, 300, 900, 620),
+        "-fill", rgba(DEEP_BLUE, 0.30),
+        "-draw", ellipse(20, 820, 640, 620),
+        # A cool wash down the left edge so the darkest region still has hue in it. Pure
+        # black next to a saturated aurora reads as a hole in the image, not as depth.
+        "-fill", rgba(DEEP_BLUE, 0.20),
+        "-draw", ellipse(120, 1400, 700, 520),
+        # Faint counter-light top-right, above the panel, to balance the bottom-heavy glow.
+        "-fill", rgba(MAGENTA, 0.10),
+        "-draw", ellipse(2400, 60, 700, 420),
+    )
+
+
+def make_text_scrim(path: pathlib.Path) -> None:
+    """Darken the headline zone so the violet `em` gradient always has somewhere to sit.
+
+    Composited `over` (not `screen`) precisely so it can subtract light the glow added.
+    This is the guarantee: retune the aurora however you like, the copy stays legible.
+    """
+    soft(
+        path, 260,
+        "-fill", rgba("#050410", TEXT_SCRIM_ALPHA),
+        "-draw", ellipse(600, 800, 980, 660),
+        "-fill", rgba("#050410", 0.34),
+        "-draw", ellipse(980, 900, 700, 520),
+    )
+
+
+def composite(base: pathlib.Path, overlay: pathlib.Path, out: pathlib.Path, mode: str = "over") -> None:
+    run_magick(base, overlay, "-compose", mode, "-composite", out)
+
+
+def render() -> None:
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.TemporaryDirectory(prefix="wallpaper_gen_") as tmp:
+        tmp = pathlib.Path(tmp)
+        base = tmp / "base.png"
+        glow = tmp / "glow.png"
+        far_accent = tmp / "far_accent.png"
+        scrim = tmp / "scrim.png"
+        top_fade = tmp / "top_fade.png"
+        top_right = tmp / "top_right.png"
+        stage = [tmp / f"stage{i}.png" for i in range(1, 7)]
+
+        make_base(base)
+        make_glow(glow)
+        make_far_accent(far_accent)
+        make_text_scrim(scrim)
+        make_top_fade(top_fade)
+        make_top_right_shadow(top_right)
+
+        # Light first, then subtract it back where the copy lives, then the menu bar chrome.
+        composite(base, glow, stage[0], mode="screen")
+        composite(stage[0], far_accent, stage[1], mode="screen")
+        composite(stage[1], scrim, stage[2])
+        composite(stage[2], top_fade, stage[3])
+        composite(stage[3], top_right, stage[4])
+        run_magick(stage[4], "-attenuate", str(GRAIN_STRENGTH), "+noise", "Gaussian", OUT)
+
+
+def main() -> None:
+    render()
+
 
 if __name__ == "__main__":
-    (OUT / "assets").mkdir(exist_ok=True)
-    hp = OUT / "_wallpaper.html"
-    hp.write_text(HTML)
-    png = OUT / "assets" / "wallpaper.png"
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
-                    "--force-device-scale-factor=2", "--window-size=1280,800",
-                    f"--screenshot={png}", str(hp)],
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
-    hp.unlink()
-    print(f"rendered {png}")
+    main()
