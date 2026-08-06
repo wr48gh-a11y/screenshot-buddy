@@ -29,22 +29,22 @@ Check the terminal, screenshot it. Something breaks, screenshot it. If you build
 
 ## Description
 
-If you build with AI coding agents, you know the rhythm: check the terminal, screenshot it. Something breaks, screenshot it. Paste it back in so the agent can see what you see. Do that fifty times a day and your screenshots folder turns into a landfill, and every time you need one, you're digging through Finder to find it.
+If you build with AI coding agents, you know the rhythm: check the terminal, screenshot it. Something breaks, screenshot it. Paste it back in so the agent can see what you see. Do that fifty times a day and your screenshots folder turns into a landfill, and every time you need one, you're digging through a folder window to find it.
 
-That's what Screenshot Buddy is for. It lives in your menu bar, a click from wherever you're working, so the shot you need is right there. No Finder, no folder sorted by name instead of time. And when the pile gets out of hand, one click clears the whole thing and shows you exactly how much space you got back.
+That's what Screenshot Buddy is for. It lives in your menu bar, a click from wherever you're working, so the shot you need is right there. No folder window, no list sorted by name instead of time. And when the pile gets out of hand, one click clears the whole thing and shows you exactly how much space you got back.
 
 You don't have to be a developer to feel this. Anyone whose screenshots folder has quietly become a disaster will get it. And it doesn't have to be screenshots, either: point it at any single folder you live in, like Downloads, and it does the same job there. Screenshots are just the most common case.
 
-Aim it at the folder where your screenshots land and every shot is a click away. Press the spacebar to preview one full-size. Drag it straight into an email, a doc, or your coding agent's chat. Rename it in place. Open it in Finder if you really need to.
+Aim it at the folder where your screenshots land and every shot is a click away. Press the spacebar to preview one full-size. Drag it straight into an email, a doc, or your coding agent's chat. Rename it in place. Reveal it on disk if you really need to.
 
 Screenshot Buddy is a menu bar app: after you connect a folder, look for its icon top-right of your screen.
 
 WHY YOU'LL LIKE IT
 
-• Every shot a click away from the menu bar, no Finder required
+• Every shot a click away from the menu bar, no folder window required
 • Quick Look built in: Space to preview, arrow keys to flip through
 • Drag straight into any app, including your coding agent's chat
-• Rename in place, Finder-style
+• Rename in place, right in the grid
 • Sweep to Trash clears the folder in one click, recoverable the normal way
 • Delete Forever frees the space instantly, with a few seconds to undo
 • Watch exactly how much space you get back, every time
