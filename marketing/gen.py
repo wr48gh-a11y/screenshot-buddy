@@ -110,11 +110,12 @@ BATT = '<svg viewBox="0 0 24 16"><rect x="1" y="3" width="18" height="10" rx="3"
 SEARCH = '<svg viewBox="0 0 16 16"><path d="M7 1.6a5.4 5.4 0 014.3 8.7l3.2 3.2-1.1 1.1-3.2-3.2A5.4 5.4 0 117 1.6zm0 1.6a3.8 3.8 0 100 7.6 3.8 3.8 0 000-7.6z"/></svg>'
 CURSOR = '<svg class="cursor" viewBox="0 0 12 19"><path d="M1 1l10 9.6H6.2l2.5 5.9-2.2.9-2.5-5.9L1 15.1z" fill="#fff" stroke="#1a1a1a" stroke-width="1"/></svg>'
 
-# Screenshot Buddy is LSUIElement — it has no app menus and never owns the menu bar. Whatever
-# the user was actually in stays frontmost, so show Finder rather than claiming menus we
-# don't have.
+# Screenshot Buddy is LSUIElement — it has no app menus and never owns the menu bar, so the
+# left side stays empty rather than claiming menus we don't have. It used to name the file
+# manager here for realism; that word is an Apple trademark and screenshots count as
+# metadata, so it came out after the 5.2.5 rejection on 2026-08-06.
 MENUBAR = f'''<div class="menubar">
-    <span class="app">Finder</span><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+    <span class="app">&nbsp;</span>
     <div class="right">
       <span class="mb-app">{mark(width=64)}</span>
       {WIFI}{BATT}{SEARCH}
@@ -140,9 +141,9 @@ def panel(sel=-1, sweep_size="2.7 MB", count=6):
     </div></div>'''
 
 SLIDES = {
-  "01-hero": f'''<div class="head"><h1>Your screenshots,<br><em>one click away.</em></h1><p>Every shot in your menu bar. No more digging through Finder.</p></div>{panel(sel=0)}''',
+  "01-hero": f'''<div class="head"><h1>Your screenshots,<br><em>one click away.</em></h1><p>Every shot in your menu bar. No more digging through folders.</p></div>{panel(sel=0)}''',
   "02-sweep": f'''<div class="head"><h1>Sweep it <em>all away.</em></h1><p>Clear the whole folder in one click, and see the space you got back.</p></div>{panel(sweep_size="48 MB", count=6)}''',
-  "03-manage": f'''<div class="head"><h1>Preview, drag, <em>rename.</em></h1><p>Press Space to Quick Look. Drag straight into any app. Rename in place.</p></div>{panel(sel=2)}''',
+  "03-manage": f'''<div class="head"><h1>Preview, drag, <em>rename.</em></h1><p>Press Space for a full-size preview. Drag straight into any app. Rename in place.</p></div>{panel(sel=2)}''',
   "04-private": f'''<div class="welcome">
       <svg class="mark" viewBox="260 242 528 518"><path fill="none" stroke="url(#g)" stroke-width="46" stroke-linecap="round" stroke-linejoin="round" d="{SPIRAL}"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9b6dff"/><stop offset="1" stop-color="#d98aff"/></linearGradient></defs></svg>
       <h2>Private by <em>design.</em></h2>
