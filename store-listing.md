@@ -8,7 +8,13 @@ Everything below is ready to paste into App Store Connect. Character limits note
 `Screenshot Buddy`
 
 ## Subtitle (30 char max)
-`Menu bar screenshot cleanup`
+`Stop digging through folders`
+
+*(28 chars. The live subtitle was "Stop digging through Finder", which this file did not record —
+that drift is what caused the 5.2.5 rejection on 2026-08-06, since only App Store Connect is
+authoritative for what actually ships. Keep this line in sync with the live field, and keep
+Apple product names out of it entirely: the subtitle is indexed marketing copy, not a place
+where a referential trademark use will be read charitably.)*
 
 ## Price
 **$2.99** (one-time purchase, Tier 3). Enroll in the **Small Business Program** (free) for the 15% commission rate instead of 30%. Consider a launch discount to $0.99 for the first week to seed reviews. Price is changeable any time in App Store Connect.
