@@ -196,6 +196,12 @@ struct PanelView: View {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                             ForEach(store.files, id: \.self) { url in
                                 ScreenshotCell(url: url)
+                                    // Pin structural identity to the URL. In a lazy grid the top
+                                    // cell is otherwise recycled by index when a new screenshot is
+                                    // prepended, and its memoized onDrag NSItemProvider comes along
+                                    // stale — so dragging the newest shot handed back the previous
+                                    // one. Explicit .id forces a fresh cell (and provider) instead.
+                                    .id(url)
                             }
                         }
                         .padding(12)
