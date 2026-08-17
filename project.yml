@@ -7,10 +7,11 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "1.0"
+    # 1.0 (build 2) shipped to the store; this drag-fix update goes out as a new version.
+    MARKETING_VERSION: "1.0.1"
     # Bumped for the resubmission after the 2026-08-06 rejection: App Store Connect refuses a
     # build number it has already accepted, even when that build was rejected.
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
     DEVELOPMENT_TEAM: "GN7N7785WD"
     CODE_SIGN_STYLE: Automatic
 
