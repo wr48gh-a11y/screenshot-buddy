@@ -72,7 +72,12 @@ struct ScreenshotCell: View {
             if trashError { withAnimation { trashError = false } }
         }
         .help(url.lastPathComponent)
-        .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
+        // .draggable, not .onDrag: onDrag's NSItemProvider was resolved through a stale
+        // gesture-layer cache in the lazy grid, so dragging the newest cell handed out the
+        // second-newest file. draggable's payload is an autoclosure evaluated at drag start,
+        // so it always reads this cell's current url. The NSLog lets us confirm from the
+        // unified log which file a drag actually carried if this ever regresses.
+        .draggable(dragPayload)
         .gesture(TapGesture(count: 2).onEnded { NSWorkspace.shared.open(url) })
         .simultaneousGesture(TapGesture(count: 1).onEnded { store.select(url) })
         .contextMenu {
@@ -86,6 +91,12 @@ struct ScreenshotCell: View {
                 if !ok { withAnimation { trashError = true } }
             }
         }
+    }
+
+    /// Evaluated lazily (via draggable's autoclosure) at the instant a drag begins.
+    private var dragPayload: URL {
+        NSLog("ScreenshotBuddy drag begin: %@", url.lastPathComponent)
+        return url
     }
 
     private func beginRename() {
