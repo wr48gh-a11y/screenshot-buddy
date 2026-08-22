@@ -196,6 +196,10 @@ struct PanelView: View {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                             ForEach(store.files, id: \.self) { url in
                                 ScreenshotCell(url: url)
+                                    // Pin structural identity to the URL so a prepended screenshot
+                                    // gets a fresh cell rather than a recycled slot. Note this alone
+                                    // did not cure the wrong-cell drag; that fix is FileDragSource.
+                                    .id(url)
                             }
                         }
                         .padding(12)

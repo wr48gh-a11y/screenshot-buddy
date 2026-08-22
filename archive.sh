@@ -21,6 +21,7 @@ xcodebuild -project ScreenshotBuddy.xcodeproj \
   -configuration Release \
   -destination 'generic/platform=macOS' \
   -archivePath "$ARCHIVE" \
+  -allowProvisioningUpdates \
   archive
 
 echo "› Archive created at: $ARCHIVE"
@@ -29,7 +30,8 @@ echo "› Exporting for the App Store…"
 xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \
   -exportOptionsPlist exportOptions.plist \
-  -exportPath "$DERIVED/export"
+  -exportPath "$DERIVED/export" \
+  -allowProvisioningUpdates
 
 echo ""
 echo "✓ Done. Signed package is in: $DERIVED/export"

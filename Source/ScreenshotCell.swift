@@ -23,6 +23,13 @@ struct ScreenshotCell: View {
                     RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(Color.accentColor, lineWidth: isSelected ? 3 : 0)
                 )
+                // Drag lives in AppKit, not SwiftUI. See FileDragSource for why; the SwiftUI
+                // drag modifiers kept dragging the neighbouring cell.
+                .overlay(
+                    FileDragSource(url: url,
+                                   onClick: { store.select(url) },
+                                   onDoubleClick: { NSWorkspace.shared.open(url) })
+                )
             if renaming {
                 TextField("Name", text: $newName)
                     .textFieldStyle(.roundedBorder)
@@ -72,7 +79,8 @@ struct ScreenshotCell: View {
             if trashError { withAnimation { trashError = false } }
         }
         .help(url.lastPathComponent)
-        .onDrag { NSItemProvider(contentsOf: url) ?? NSItemProvider() }
+        // These only see the caption area now; the thumbnail's FileDragSource handles its own
+        // clicks and the drag.
         .gesture(TapGesture(count: 2).onEnded { NSWorkspace.shared.open(url) })
         .simultaneousGesture(TapGesture(count: 1).onEnded { store.select(url) })
         .contextMenu {
