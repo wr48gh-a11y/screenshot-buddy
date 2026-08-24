@@ -46,3 +46,14 @@ if [ "$PROBLEMS" -gt 0 ]; then
 fi
 
 exit 0
+
+# Wrong-cell drag guard (2026-08-24). The panel grid must stay an eager Grid and drag must
+# stay in AppKit (FileDragSource). LazyVGrid recycling served stale hit-test geometry, so
+# pressing the newest cell dispatched to its neighbour; SwiftUI's drag modifiers rode on the
+# same broken hit-testing. See memory: screenshot-first-item-bug.
+BANNED=$(grep -rn "LazyVGrid\|\.onDrag\|\.draggable" Source/ || true)
+if [ -n "$BANNED" ]; then
+  echo "FAIL: banned pattern in Source/ (wrong-cell drag regression risk):"
+  echo "$BANNED"
+  exit 1
+fi

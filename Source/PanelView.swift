@@ -193,13 +193,23 @@ struct PanelView: View {
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                            ForEach(store.files, id: \.self) { url in
-                                ScreenshotCell(url: url)
-                                    // Pin structural identity to the URL so a prepended screenshot
-                                    // gets a fresh cell rather than a recycled slot. Note this alone
-                                    // did not cure the wrong-cell drag; that fix is FileDragSource.
-                                    .id(url)
+                        // Eager Grid, NOT LazyVGrid. Lazy containers recycle cells, and when a
+                        // screenshot was prepended while the panel was closed the recycled cells'
+                        // hit-test geometry lagged one slot behind the redrawn thumbnails: pressing
+                        // the newest cell dispatched to its neighbour's view (select and drag both).
+                        // Confirmed via the drag log naming the neighbour on 2026-08-24. Every prior
+                        // fix (.id, .draggable, AppKit overlay) died on this recycling; an eager Grid
+                        // rebuilds real frames on every update, so there is nothing stale to hit.
+                        Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                            ForEach(Array(stride(from: 0, to: store.files.count, by: 2)), id: \.self) { i in
+                                GridRow {
+                                    ScreenshotCell(url: store.files[i])
+                                        .id(store.files[i])
+                                    if i + 1 < store.files.count {
+                                        ScreenshotCell(url: store.files[i + 1])
+                                            .id(store.files[i + 1])
+                                    }
+                                }
                             }
                         }
                         .padding(12)
