@@ -23,6 +23,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// any main window or menu bar extra") — a silent `exit(0)` is indistinguishable from an
     /// app that crashes on launch, and a menu bar app has no Dock icon to prove otherwise.
     private func standDownIfAlreadyRunning() {
+        // Under XCTest the app IS the test host, and the installed copy is almost always running
+        // too. Standing down there kills the test runner before it can connect ("Early
+        // unexpected exit ... exited with code 0"), which reads as a broken test suite rather
+        // than a duplicate app.
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         guard let id = Bundle.main.bundleIdentifier else { return }
         let mine = ProcessInfo.processInfo.processIdentifier
         let others = NSRunningApplication.runningApplications(withBundleIdentifier: id)

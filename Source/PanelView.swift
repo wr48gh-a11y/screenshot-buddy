@@ -193,13 +193,16 @@ struct PanelView: View {
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        // Eager Grid, NOT LazyVGrid. Lazy containers recycle cells, and when a
-                        // screenshot was prepended while the panel was closed the recycled cells'
-                        // hit-test geometry lagged one slot behind the redrawn thumbnails: pressing
-                        // the newest cell dispatched to its neighbour's view (select and drag both).
-                        // Confirmed via the drag log naming the neighbour on 2026-08-24. Every prior
-                        // fix (.id, .draggable, AppKit overlay) died on this recycling; an eager Grid
-                        // rebuilds real frames on every update, so there is nothing stale to hit.
+                        // Eager Grid, NOT LazyVGrid. Lazy containers recycle cells, which makes
+                        // hit-test geometry hard to reason about in a list that gets items
+                        // prepended. Keep it eager.
+                        //
+                        // Note for anyone re-reading this while chasing "the newest screenshot
+                        // will not drag": that bug was NOT caused by this container. It was the
+                        // thumbnail's unclipped aspect-fill overflow staying interactive and
+                        // covering the cell to its left. See ThumbnailView and HANDOFF.md. In a
+                        // GridRow the right-hand cell is hit-tested first, which is why the
+                        // left-hand (newest) cell was the one that lost.
                         Grid(horizontalSpacing: 8, verticalSpacing: 8) {
                             ForEach(Array(stride(from: 0, to: store.files.count, by: 2)), id: \.self) { i in
                                 GridRow {

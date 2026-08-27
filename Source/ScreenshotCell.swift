@@ -7,6 +7,8 @@ import UniformTypeIdentifiers
 struct ScreenshotCell: View {
     @EnvironmentObject var store: ScreenshotStore
     let url: URL
+    /// Test-only, forwarded to `ThumbnailView`. See its `previewImage`. Always nil in the app.
+    var previewImage: NSImage?
     @State private var renaming = false
     @State private var newName = ""
     @State private var renameError: String?
@@ -18,7 +20,7 @@ struct ScreenshotCell: View {
 
     var body: some View {
         VStack(spacing: 5) {
-            ThumbnailView(url: url)
+            ThumbnailView(url: url, previewImage: previewImage)
                 .overlay(
                     RoundedRectangle(cornerRadius: 10)
                         .strokeBorder(Color.accentColor, lineWidth: isSelected ? 3 : 0)
@@ -29,6 +31,7 @@ struct ScreenshotCell: View {
                     FileDragSource(url: url,
                                    onClick: { store.select(url) },
                                    onDoubleClick: { NSWorkspace.shared.open(url) })
+                        .frame(width: ThumbnailView.width, height: ThumbnailView.height)
                 )
             if renaming {
                 TextField("Name", text: $newName)

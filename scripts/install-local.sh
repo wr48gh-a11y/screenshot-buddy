@@ -29,12 +29,28 @@ echo "Installing to $DEST…"
 rm -rf "$DEST"
 cp -R "$BUILT" "$DEST"
 
-echo "Removing the DerivedData build copy so it can't show as a duplicate…"
-"$LSREG" -u "$BUILT" 2>/dev/null || true
-rm -rf "$BUILT"
+# Both configurations, not just the one we built. `xcodebuild test` produces a Debug .app and
+# registers it too, so running the test suite silently creates a second copy claiming the
+# bundle ID.
+echo "Removing the DerivedData build copies so they can't show as duplicates…"
+DERIVED="$(dirname "$(dirname "$BUILT")")"
+for CONFIG in Debug Release; do
+  STRAY="$DERIVED/$CONFIG/ScreenshotBuddy.app"
+  [ -d "$STRAY" ] || continue
+  "$LSREG" -u "$STRAY" 2>/dev/null || true
+  rm -rf "$STRAY"
+done
+
+# Stamp the commit this copy was built from. Without it there is no way to tell a current
+# install from one built weeks ago, and testing against a stale install has burned a whole
+# session before — the bug looked fixed in the repo and broken on screen. `verify-install.sh`
+# reads this back.
+git rev-parse HEAD > "$DEST/Contents/Resources/BUILD_COMMIT" 2>/dev/null || true
 
 echo "Launching the installed copy…"
 open "$DEST"
 
 echo "Done. Registered copies:"
 mdfind "kMDItemCFBundleIdentifier == 'com.hugh.screenshotbuddy'"
+
+exec "$(dirname "$0")/verify-install.sh"

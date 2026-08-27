@@ -5,17 +5,14 @@ import os
 /// AppKit-owned drag source laid over a grid cell's thumbnail.
 ///
 /// Why this exists: SwiftUI's own drag modifiers (`.onDrag`, then `.draggable`) both shipped
-/// with the same bug. After a new screenshot was prepended while the panel was closed, pressing
-/// on the newest (top-left) cell dragged the cell to its right: the drag preview was a snapshot
-/// of the neighbour, so SwiftUI's gesture layer was resolving the pointer to the wrong cell,
-/// not merely handing out a stale payload. Pinning identity (`.id(url)`) and switching to
-/// `.draggable` did not change that, because the problem is SwiftUI's drag-source hit-testing
-/// inside the lazy grid, not the payload.
+/// with the same symptom, pressing the newest (top-left) cell acted on the cell to its right.
+/// Moving drag into AppKit gives us a real `NSView` frame we can log and hit-test, which is how
+/// the actual cause was finally found: the neighbouring thumbnail's unclipped overflow, not the
+/// drag API. See `ThumbnailView` for the fix and HANDOFF.md for the full story.
 ///
-/// AppKit hit-tests real `NSView` frames, which SwiftUI lays out alongside everything else. The
-/// view under the pointer is the one that receives `mouseDown`, and it starts a dragging
-/// session carrying its own `url`. Nothing is cached between cells, so there is no stale state
-/// to recycle.
+/// Keeping drag here is still the right call. AppKit hit-tests real `NSView` frames, the view
+/// under the pointer receives `mouseDown`, and it starts a dragging session carrying its own
+/// `url`. Nothing is cached between cells, so there is no stale state to recycle.
 ///
 /// The view also handles single click (select) and double click (open) since it sits on top of
 /// the thumbnail and would otherwise swallow them. Right-click is left alone: `NSView`'s default
@@ -34,6 +31,16 @@ struct FileDragSource: NSViewRepresentable {
 
     func updateNSView(_ view: FileDragSourceView, context: Context) {
         apply(to: view)
+    }
+
+    /// Pin the view to the thumbnail's size. An `NSViewRepresentable` has no intrinsic size, so
+    /// without this SwiftUI hands it the full proposed width: inside a `GridRow` that proposal is
+    /// the whole row, and the drag view ends up wider than its cell, lying on top of the cell
+    /// next to it and swallowing its clicks. Same failure mode as the thumbnail overflow that
+    /// caused the "can't drag the newest screenshot" bug, from the other direction.
+    /// Covered by `CellHitTestingTests.testDragViewIsPinnedToThumbnailSize`.
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: FileDragSourceView, context: Context) -> CGSize? {
+        CGSize(width: ThumbnailView.width, height: ThumbnailView.height)
     }
 
     private func apply(to view: FileDragSourceView) {

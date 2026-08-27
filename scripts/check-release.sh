@@ -45,15 +45,70 @@ if [ "$PROBLEMS" -gt 0 ]; then
   fi
 fi
 
-exit 0
+# ---------------------------------------------------------------------------
+# Drag regression guards. These are NOT signing checks, so --warn-only does not
+# soften them: shipping this bug again is worse than a blocked build.
+#
+# This block used to sit below an `exit 0` and had therefore never run once. If
+# you add a check, add it above the final exit and re-run the script to confirm
+# it actually executes.
+# ---------------------------------------------------------------------------
+DRAG_FAIL=0
 
-# Wrong-cell drag guard (2026-08-24). The panel grid must stay an eager Grid and drag must
-# stay in AppKit (FileDragSource). LazyVGrid recycling served stale hit-test geometry, so
-# pressing the newest cell dispatched to its neighbour; SwiftUI's drag modifiers rode on the
-# same broken hit-testing. See memory: screenshot-first-item-bug.
-BANNED=$(grep -rn "LazyVGrid\|\.onDrag\|\.draggable" Source/ || true)
+# 3. Cell hit area must stay clipped. `clipShape` clips drawing but NOT hit testing, so an
+#    aspect-fill screenshot stays interactive far outside its 172pt cell and covers the
+#    neighbouring cell. That is the real cause of "can't drag the newest screenshot".
+for MODIFIER in ".clipped()" ".contentShape("; do
+  if ! grep -qF -- "$MODIFIER" Source/Thumbnail.swift 2>/dev/null; then
+    echo "✗ Source/Thumbnail.swift: missing '$MODIFIER'. The thumbnail's interactive area must" >&2
+    echo "  be clipped to the cell or it steals presses from the neighbouring cell." >&2
+    echo "  See CellHitTestingTests and HANDOFF.md 'The newest screenshot will not drag'." >&2
+    DRAG_FAIL=1
+  fi
+done
+
+# 4. The drag view must stay pinned to the thumbnail's size. Without sizeThatFits an
+#    NSViewRepresentable takes the whole proposed row width and covers its neighbour.
+if ! grep -q "func sizeThatFits" Source/FileDragSource.swift 2>/dev/null; then
+  echo "✗ Source/FileDragSource.swift: missing sizeThatFits. The drag view must be pinned to" >&2
+  echo "  the thumbnail's size, or SwiftUI stretches it across the whole row." >&2
+  DRAG_FAIL=1
+fi
+
+# 5. The panel grid stays eager and drag stays in AppKit. Lazy containers recycle cells and
+#    SwiftUI's own drag modifiers ride on hit-testing we do not control.
+# Comment lines are excluded: the history of this bug is documented in the source, and naming
+# the banned APIs in a comment must not trip the guard.
+BANNED=$(grep -rn "LazyVGrid\|\.onDrag\|\.draggable" Source/ \
+  | grep -vE "^[^:]+:[0-9]+:[[:space:]]*//" || true)
 if [ -n "$BANNED" ]; then
-  echo "FAIL: banned pattern in Source/ (wrong-cell drag regression risk):"
-  echo "$BANNED"
+  echo "✗ banned pattern in Source/ (wrong-cell drag regression risk):" >&2
+  echo "$BANNED" >&2
+  DRAG_FAIL=1
+fi
+
+# 6. The regression tests themselves must exist and pass. The greps above only check that the
+#    modifiers are present; only the tests prove the hit area is actually correct.
+if [ ! -f Tests/ScreenshotBuddyTests/CellHitTestingTests.swift ]; then
+  echo "✗ Tests/ScreenshotBuddyTests/CellHitTestingTests.swift is missing. Do not delete it." >&2
+  DRAG_FAIL=1
+fi
+
+if [ "$DRAG_FAIL" -ne 0 ]; then
+  echo "Refusing to proceed: drag hit-testing guard failed." >&2
   exit 1
 fi
+
+if [ "${SKIP_TESTS:-0}" != "1" ]; then
+  echo "Running hit-testing regression tests…"
+  if ! xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy \
+        -configuration Debug test \
+        -only-testing:ScreenshotBuddyTests/CellHitTestingTests >/dev/null 2>&1; then
+    echo "✗ CellHitTestingTests failed. The newest screenshot's cell is not receiving presses." >&2
+    echo "  Run them directly to see why:" >&2
+    echo "  xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy -configuration Debug test -only-testing:ScreenshotBuddyTests/CellHitTestingTests" >&2
+    exit 1
+  fi
+fi
+
+exit 0

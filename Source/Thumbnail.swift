@@ -40,6 +40,11 @@ final class ThumbnailLoader: ObservableObject {
 
 struct ThumbnailView: View {
     let url: URL
+    /// Test-only seed image, used in place of the Quick Look thumbnail. `CellHitTestingTests`
+    /// needs a deliberately over-wide image to prove the cell's interactive area stays clipped
+    /// to 172x108; Quick Look generation is async and would make that test meaningless.
+    /// Always nil in the app.
+    var previewImage: NSImage?
     @StateObject private var loader = ThumbnailLoader()
 
     static let width: CGFloat = 172
@@ -49,7 +54,7 @@ struct ThumbnailView: View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.white.opacity(0.07))
-            if let image = loader.image {
+            if let image = loader.image ?? previewImage {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -67,6 +72,13 @@ struct ThumbnailView: View {
             }
         }
         .frame(width: Self.width, height: Self.height)
+        // `clipShape` above clips drawing but NOT hit testing: an aspect-fill screenshot is far
+        // wider than the 172pt cell, so the overflow stayed live and covered the neighbouring
+        // cell. In a GridRow the right-hand cell is hit-tested first, so its overflow swallowed
+        // every press on the newest (top-left) screenshot. `clipped()` + `contentShape` confine
+        // both the drawing and the interactive area to the cell.
+        .clipped()
+        .contentShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.18), radius: 3, y: 1)
         .onAppear { loader.load(url: url, size: Self.width) }
         .onDisappear { loader.cancel() }
