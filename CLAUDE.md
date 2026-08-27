@@ -3,7 +3,9 @@
 macOS menu bar app: shows the screenshots in a chosen folder, lets you drag them out to other
 apps, and sweeps them to the Trash in bulk.
 
-Read [HANDOFF.md](HANDOFF.md) before anything else.
+Read [HANDOFF.md](HANDOFF.md) before anything else. [SESSION-LOG.md](SESSION-LOG.md) is
+newest-first history; its July 2026 sections are stale by design (single-file app, `build.sh`,
+old repo layout) and are kept only as a record. Never take working instructions from them.
 
 ## If the report is "I can't drag the newest screenshot"
 

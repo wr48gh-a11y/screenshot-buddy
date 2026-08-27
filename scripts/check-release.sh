@@ -101,9 +101,24 @@ fi
 
 if [ "${SKIP_TESTS:-0}" != "1" ]; then
   echo "Running hit-testing regression tests…"
-  if ! xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy \
-        -configuration Debug test \
-        -only-testing:ScreenshotBuddyTests/CellHitTestingTests >/dev/null 2>&1; then
+  TEST_OK=0
+  xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy \
+    -configuration Debug test \
+    -only-testing:ScreenshotBuddyTests/CellHitTestingTests >/dev/null 2>&1 || TEST_OK=1
+
+  # `xcodebuild test` leaves a Debug .app in DerivedData and registers it with LaunchServices,
+  # creating a second bundle claiming com.hugh.screenshotbuddy. Clean up after ourselves, or
+  # this guard leaves the machine in the exact state verify-install.sh exists to catch.
+  BUILT_DEBUG="$(xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy \
+    -configuration Debug -showBuildSettings 2>/dev/null \
+    | awk -F' = ' '/ BUILT_PRODUCTS_DIR /{print $2; exit}')/ScreenshotBuddy.app"
+  if [ -d "$BUILT_DEBUG" ]; then
+    LSREG="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
+    "$LSREG" -u "$BUILT_DEBUG" 2>/dev/null || true
+    rm -rf "$BUILT_DEBUG"
+  fi
+
+  if [ "$TEST_OK" -ne 0 ]; then
     echo "✗ CellHitTestingTests failed. The newest screenshot's cell is not receiving presses." >&2
     echo "  Run them directly to see why:" >&2
     echo "  xcodebuild -project ScreenshotBuddy.xcodeproj -scheme ScreenshotBuddy -configuration Debug test -only-testing:ScreenshotBuddyTests/CellHitTestingTests" >&2

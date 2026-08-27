@@ -1,5 +1,73 @@
 # Screenshot Buddy — Session Log
 
+> **Newest first.** Everything below the 2026-08-27 entry is the original July build log and is
+> kept for history. Parts of it are now WRONG — it predates the split into multiple source
+> files, the `scripts/` directory, and the test suite. For current state read
+> [CLAUDE.md](CLAUDE.md) and [HANDOFF.md](HANDOFF.md), never the July sections.
+
+---
+
+## 2026-08-27 — the drag bug, diagnosed correctly on the ninth attempt
+
+**Report:** "I can no longer drag the latest screenshot out of the dropdown", with nobody having
+touched the code since the last fix.
+
+**Two independent problems, and the first one hid the second for half the session.**
+
+1. **Stale install.** `~/Applications` held build 3, from *before* the August `Grid` fix. The
+   repo had a fix the running app did not. Nothing in the tooling could detect this, so the
+   first hour went into reading code that was already correct.
+2. **The actual bug**, which the reinstall did not solve. `ThumbnailView` renders screenshots
+   with `.aspectRatio(contentMode: .fill)` in a 172x108 cell. Screenshots are much wider, so
+   the image overflows sideways, and `clipShape` clips **drawing but not hit testing**. That
+   overflow stayed interactive and lay over the neighbouring cell. In a `GridRow` the
+   right-hand cell is hit-tested first, so its invisible overflow covered the newest screenshot
+   at top-left and swallowed every press on it.
+
+**Why it looked like drift.** The overlap was always there. It only ever bites the top-left
+cell, and it only becomes noticeable when a new file arrives and creates a *new* newest
+screenshot. Taking a screenshot was the trigger, which is why it appeared out of nowhere.
+
+**Why three previous fixes "worked" and then didn't.** `.onDrag` → `.draggable` → AppKit
+`FileDragSource`, and `LazyVGrid` → eager `Grid`, each changed *which view won a hit test that
+was rigged from the start*. Each looked correct until the next screenshot landed. The eager
+`Grid` is kept because it is still the right container, but it was never the fix.
+
+**How it was finally found.** Inference had failed three times, so this session measured
+instead. Contrary to the old note in HANDOFF.md, this menu bar app *can* be driven by
+automation: System Events clicks the menu bar item, a small Swift binary synthesises `CGEvent`
+presses and drags, and a temporary
+`NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown)` logs
+`window.contentView?.hitTest(...)`. The probe showed the press reaching SwiftUI's container and
+never the cell's drag view, while the identical press one column right resolved correctly.
+(`hitTest` takes a point in the receiver's **superview** coordinates; passing a converted point
+sends you chasing a phantom.)
+
+**Fix:** `.clipped()` + `.contentShape(...)` on `ThumbnailView`, and `sizeThatFits` on
+`FileDragSource` so the AppKit drag view cannot stretch across the row either.
+
+**Locks added, because a grep-only guard did not hold last time:**
+- `Tests/ScreenshotBuddyTests/CellHitTestingTests.swift` — real two-cell `GridRow`, over-wide
+  image, asserts a press at the left cell's centre reaches the left cell's own drag view.
+  Confirmed to fail when the clipping is removed, so it is not a vacuous test.
+- `scripts/check-release.sh` — **its entire regression-guard block was below an `exit 0` and had
+  never executed once.** Moved above the exit, extended, and it now runs the tests.
+- `scripts/verify-install.sh` — answers "is the app on screen the code in this repo?".
+  `install-local.sh` stamps the built commit into the bundle and calls it.
+- `install-local.sh` now also deletes the Debug build product, which `xcodebuild test`
+  registers as a second bundle claiming the same ID (found one live on this machine).
+- The DEBUG duplicate-instance guard now skips XCTest runs; it was killing the test host before
+  it could connect, which read as a broken suite.
+- `build.sh` was a second install path with no signing identity, no cleanup and no commit
+  stamp. It now forwards to `install-local.sh`.
+
+**Lesson for the next session:** when a bug report contradicts the source, verify the artefact
+before reading the code, and measure the failing interaction before theorising about it.
+
+---
+
+## 2026-07-17 → 2026-07-18 — initial build
+
 **Date:** 2026-07-17 → 2026-07-18
 **Outcome:** Built a native macOS menu bar app from scratch and got it App Store–ready, pending only Apple account activation.
 
@@ -9,7 +77,8 @@
 
 A native macOS menu bar app (SwiftUI/AppKit) that manages a screenshots folder: view thumbnails, Quick Look, drag out, rename in place, and permanently clear the whole folder in one click. Two states — no folder connected (floating welcome window) and folder connected (the menu bar panel).
 
-- **Source of truth:** `Source/ScreenshotBuddyApp.swift` (single-file app)
+- **Source of truth:** `Source/ScreenshotBuddyApp.swift` (single-file app — *no longer true, the
+  app was split across many files in `Source/` during August 2026*)
 - **App installed at:** `~/Applications/Screenshot Buddy.app` (from `build.sh`, fast iteration)
 - **Bundle ID:** `com.hugh.screenshotbuddy`
 
@@ -72,5 +141,8 @@ screenshot-buddy/
 ```
 
 ## Build commands
+> **Superseded.** `./build.sh` now forwards to `./scripts/install-local.sh`, which is the only
+> supported install path. See CLAUDE.md. The historical text follows.
+
 - Iterate: `./build.sh` (installs to ~/Applications, ad-hoc signed)
 - Submit: set Team ID, then `./archive.sh`
